@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:gps_chat_app/ui/pages/auth/signup_page.dart';
 import 'package:gps_chat_app/ui/pages/home/home_page.dart';
 
 class SplashPage extends StatefulWidget {
@@ -81,7 +82,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       // 화면 전환
       Navigator.of(
         context,
-      ).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
+      ).pushReplacement(MaterialPageRoute(builder: (context) => SignupPage()));
     });
   }
 
