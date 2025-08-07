@@ -76,7 +76,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       bubbleController.forward();
 
       // 애니메이션 총 시간과 비슷하게 딜레이를 준 후 메인 화면으로 이동
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 3));
 
       // 화면 전환
       Navigator.of(

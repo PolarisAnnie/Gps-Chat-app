@@ -4,14 +4,13 @@ import 'package:gps_chat_app/firebase_options.dart';
 import 'package:gps_chat_app/ui/pages/splash/splash_page.dart';
 
 void main() async {
-  runApp(const MyApp());
   // Flutter 바인딩 초기화
   WidgetsFlutterBinding.ensureInitialized();
 
   // Firebase 초기화
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
