@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
 import 'package:gps_chat_app/data/model/chat_room.dart';
 import 'package:gps_chat_app/data/model/user.dart';
+import 'package:gps_chat_app/ui/pages/chat/chat_page.dart';
 import 'package:gps_chat_app/ui/pages/chat_room_list/widgets/chat_room_item.dart';
 
 class ChatRoomListPage extends StatelessWidget {
@@ -32,6 +33,14 @@ class ChatRoomListPage extends StatelessWidget {
                     onTap: () {
                       //TODO : 채팅방 클릭 시 상세 페이지로 이동
                       print('채팅방 클릭');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) {
+                            return ChatPage();
+                          },
+                        ),
+                      );
                     },
                     child: ChatRoomItem(
                       chatRoom: chatRooms[index], // chatRoom 데이터 전달

@@ -14,11 +14,16 @@ class ChatRoomItem extends StatelessWidget {
           height: 48,
           width: 48,
           decoration: BoxDecoration(color: Colors.grey, shape: BoxShape.circle),
-          child: ClipOval(
-            child: Image.network(
-              //TODO : firebase 프로필 이미지 URL로 연결
-              'https://picsum.photos/480/480',
-              fit: BoxFit.cover,
+          child: GestureDetector(
+            onTap: () {
+              print('프로필 이미지 클릭');
+            },
+            child: ClipOval(
+              child: Image.network(
+                //TODO : firebase 프로필 이미지 URL로 연결
+                'https://picsum.photos/480/480',
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         ),
