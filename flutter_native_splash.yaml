@@ -1,7 +1,7 @@
 flutter_native_splash:
   # 스플래시 화면의 배경색
   color: "#FFFFFF" # 흰색
-  # 1단계에서 준비한 정적 이미지
+  # 1단계에서 준비한 static 이미지
   image: assets/images/cat_logo.png
 
   # 안드로이드 12 이상을 위한 설정 (아이콘 배경 등)
