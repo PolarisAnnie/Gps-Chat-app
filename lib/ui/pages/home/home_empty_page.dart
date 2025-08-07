@@ -73,7 +73,7 @@ class Home extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 10), // 상단바와 텍스트 사이 간격
+            const SizedBox(height: 10),
             Container(
               width: 375,
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -144,7 +144,7 @@ class Home extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             SizedBox(
-              height: 250, // 아이템 높이(188) + 텍스트 공간 포함
+              height: 250,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(

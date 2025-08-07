@@ -81,7 +81,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       // 화면 전환
       Navigator.of(
         context,
-      ).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
+      ).pushReplacement(MaterialPageRoute(builder: (context) => Homepage()));
     });
   }
 
