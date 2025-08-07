@@ -76,6 +76,44 @@ class Homepage extends StatelessWidget {
             ),
             const SizedBox(height: 10),
 
+            // 지금 바로 연결 가능한, 텍스트
+            Container(
+              width: 375,
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              alignment: Alignment.centerLeft,
+              child: const Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '지금 ',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '바로 연결',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF3266FF),
+                      ),
+                    ),
+                    TextSpan(
+                      text: ' 가능한,',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // 연결 가능한 친구 리스트
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
