@@ -1,9 +1,17 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:gps_chat_app/ui/pages/auth/login_page.dart';
+import 'package:gps_chat_app/firebase_options.dart';
 import 'package:gps_chat_app/ui/pages/home/home_page.dart';
 
-void main() {
+void main() async {
   runApp(const MyApp());
+  // Flutter 바인딩 초기화
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Firebase 초기화
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1070993042180",
+    "project_id": "gps-chat-app-39606",
+    "storage_bucket": "gps-chat-app-39606.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1070993042180:android:bf9a763b607875dab3be51",
+        "android_client_info": {
+          "package_name": "com.example.gps_chat_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDEVLQUo4-Vb0dIjouX0ToqoXmRekFt6U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
