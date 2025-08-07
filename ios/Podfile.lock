@@ -1256,7 +1256,10 @@ PODS:
   - Flutter (1.0.0)
   - flutter_native_splash (2.4.3):
     - Flutter
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9f08581 (feat: splash screen 제작, flutter_native_splash 설치, 로고 사진 파일 추가)
   - geolocator_apple (1.2.0):
     - Flutter
     - FlutterMacOS
@@ -1392,9 +1395,13 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - Flutter (from `Flutter`)
 <<<<<<< HEAD
+<<<<<<< HEAD
   - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
 =======
 >>>>>>> c61c7fc (fix: iOS 최소 버전 변경)
+=======
+  - flutter_native_splash (from `.symlinks/plugins/flutter_native_splash/ios`)
+>>>>>>> 9f08581 (feat: splash screen 제작, flutter_native_splash 설치, 로고 사진 파일 추가)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/darwin`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
@@ -1431,10 +1438,15 @@ EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
 <<<<<<< HEAD
+<<<<<<< HEAD
   flutter_native_splash:
     :path: ".symlinks/plugins/flutter_native_splash/ios"
 =======
 >>>>>>> c61c7fc (fix: iOS 최소 버전 변경)
+=======
+  flutter_native_splash:
+    :path: ".symlinks/plugins/flutter_native_splash/ios"
+>>>>>>> 9f08581 (feat: splash screen 제작, flutter_native_splash 설치, 로고 사진 파일 추가)
   geolocator_apple:
     :path: ".symlinks/plugins/geolocator_apple/darwin"
   package_info_plus:
@@ -1460,9 +1472,13 @@ SPEC CHECKSUMS:
   FirebaseSharedSwift: 59266c22ccfcef604d725c034c568fa666ea9bda
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
 <<<<<<< HEAD
+<<<<<<< HEAD
   flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
 =======
 >>>>>>> c61c7fc (fix: iOS 최소 버전 변경)
+=======
+  flutter_native_splash: c32d145d68aeda5502d5f543ee38c192065986cf
+>>>>>>> 9f08581 (feat: splash screen 제작, flutter_native_splash 설치, 로고 사진 파일 추가)
   geolocator_apple: ab36aa0e8b7d7a2d7639b3b4e48308394e8cef5e
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   "gRPC-C++": cc207623316fb041a7a3e774c252cf68a058b9e8
