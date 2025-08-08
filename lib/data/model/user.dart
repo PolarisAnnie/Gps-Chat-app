@@ -20,4 +20,29 @@ class User {
     required this.longitude,
     this.address,
   });
+
+  // Firestore에서 불러올 때 사용
+  User.fromJson(Map<String, dynamic> map)
+    : this(
+        userId: map['userId'],
+        nickname: map['nickname'],
+        introduction: map['introduction'],
+        imageUrl: map['imageUrl'],
+        latitude: map['latitude'],
+        longitude: map['longitude'],
+        address: map['address'] ?? '',
+      );
+
+  // Firestore로 저장할 때 사용
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'nickname': nickname,
+      'introduction': introduction,
+      'imageUrl': imageUrl,
+      'latitude': latitude,
+      'longitude': longitude,
+      'address': address,
+    };
+  }
 }
