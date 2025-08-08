@@ -1,7 +1,55 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'api.dart'; // NaverApiService import
 
-class Homepage extends StatelessWidget {
-  const Homepage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  List<dynamic> cafes = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCafes();
+  }
+
+  Future<void> fetchCafes() async {
+    try {
+      final api = NaverApiService();
+      final results = await api.searchLocal('카페', display: 5);
+
+      // For each result, fetch image URL using image search
+      for (var cafe in results) {
+        final title = cafe['title'] ?? '';
+        final images = await api.searchImage(
+          title.replaceAll(RegExp(r'<[^>]*>'), ''),
+        );
+
+        if (images.isNotEmpty) {
+          cafe['image'] = images.first['link']; // Use first image link
+        } else {
+          cafe['image'] = null;
+        }
+      }
+
+      setState(() {
+        cafes = results;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('API 호출 오류: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +63,9 @@ class Homepage extends StatelessWidget {
               child: Container(
                 width: 375,
                 height: 52,
-                color: Color(0xFF3266FF),
+                color: const Color(0xFF3266FF),
                 alignment: Alignment.centerLeft,
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
                     const Text(
@@ -79,7 +127,7 @@ class Homepage extends StatelessWidget {
             // 지금 바로 연결 가능한, 텍스트
             Container(
               width: 375,
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               alignment: Alignment.centerLeft,
               child: const Text.rich(
                 TextSpan(
@@ -116,14 +164,14 @@ class Homepage extends StatelessWidget {
 
             // 연결 가능한 친구 리스트
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: ListView.separated(
                 physics:
-                    NeverScrollableScrollPhysics(), // 바깥 ListView 스크롤과 충돌 방지
+                    const NeverScrollableScrollPhysics(), // 바깥 ListView 스크롤과 충돌 방지
                 shrinkWrap: true,
                 itemCount: 4,
                 separatorBuilder: (context, index) => Container(
-                  margin: EdgeInsets.symmetric(vertical: 12),
+                  margin: const EdgeInsets.symmetric(vertical: 12),
                   width: double.infinity,
                   height: 1,
                   color: Colors.grey,
@@ -134,7 +182,7 @@ class Homepage extends StatelessWidget {
                       Container(
                         width: 48,
                         height: 48,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.grey,
                           shape: BoxShape.circle,
                         ),
@@ -164,7 +212,7 @@ class Homepage extends StatelessWidget {
                       Container(
                         width: 32,
                         height: 32,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Color(0xFF3266FF),
                           shape: BoxShape.circle,
                         ),
@@ -183,9 +231,11 @@ class Homepage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
+
+            // '코딩하기 좋은 카페 추천' 텍스트
             Container(
               width: 375,
-              padding: EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               alignment: Alignment.centerLeft,
               child: const Text(
                 '코딩하기 좋은 카페 추천',
@@ -197,51 +247,127 @@ class Homepage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-
-            // 카페 추천 가로 스크롤 리스트
+            // 카페 추천 가로 스크롤 리스트 (API 데이터 기반)
             SizedBox(
-              height: 250,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                padding: EdgeInsets.only(left: 16, right: 12),
-                itemBuilder: (context, index) {
-                  return Container(
-                    width: 268,
-                    margin: EdgeInsets.only(right: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          height: 188,
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
-                            borderRadius: BorderRadius.circular(12),
+              height: 300,
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: cafes.length,
+                      padding: const EdgeInsets.only(left: 16, right: 12),
+                      itemBuilder: (context, index) {
+                        final cafe = cafes[index];
+                        final title = cafe['title'] ?? '이름 없음';
+                        final address = cafe['address'] ?? '주소 없음';
+
+                        return Container(
+                          width: 268,
+                          margin: const EdgeInsets.only(right: 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: 188,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  image: DecorationImage(
+                                    image:
+                                        cafe['image'] != null &&
+                                            cafe['image'].toString().isNotEmpty
+                                        ? NetworkImage(cafe['image'])
+                                        : const NetworkImage(
+                                            'https://ssl.pstatic.net/static/pwe/address/img_profile.png',
+                                          ),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Flexible(
+                                child: Text(
+                                  title.replaceAll(RegExp(r'<[^>]*>'), ''),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                              Flexible(
+                                child: Text(
+                                  address,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black54,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                ),
+                              ),
+                            ],
                           ),
-                          // 이미지나 내용 넣는 자리
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          '모각코 카페',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const Text(
-                          '서울시 마포구 서교동 433-2 1층',
-                          style: TextStyle(fontSize: 14, color: Colors.black54),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class NaverApiService {
+  static const String _localUrl =
+      'https://openapi.naver.com/v1/search/local.json';
+  static const String _imageUrl = 'https://openapi.naver.com/v1/search/image';
+  final String clientId = 'o3Tj7WLieNlEAvX9xRjl';
+  final String clientSecret = 'D47zCqbJxO';
+
+  Future<List<dynamic>> searchLocal(String query, {int display = 10}) async {
+    final url = Uri.parse(
+      '$_localUrl?query=${Uri.encodeQueryComponent(query)}&display=$display',
+    );
+
+    final response = await http.get(
+      url,
+      headers: {
+        'X-Naver-Client-Id': clientId,
+        'X-Naver-Client-Secret': clientSecret,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonBody = json.decode(response.body);
+      return jsonBody['items'] as List<dynamic>;
+    } else {
+      throw Exception('Failed to fetch local data');
+    }
+  }
+
+  Future<List<dynamic>> searchImage(String query, {int display = 1}) async {
+    final url = Uri.parse(
+      '$_imageUrl?query=${Uri.encodeQueryComponent(query)}&display=$display',
+    );
+
+    final response = await http.get(
+      url,
+      headers: {
+        'X-Naver-Client-Id': clientId,
+        'X-Naver-Client-Secret': clientSecret,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonBody = json.decode(response.body);
+      return jsonBody['items'] as List<dynamic>;
+    } else {
+      print('Image API 호출 실패: ${response.body}');
+      return [];
+    }
   }
 }
