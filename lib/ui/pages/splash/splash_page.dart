@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:gps_chat_app/ui/pages/auth/signup_page.dart';
 import 'package:gps_chat_app/ui/pages/home/home_page.dart';
 
 class SplashPage extends StatefulWidget {
@@ -75,13 +76,13 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       await Future.delayed(const Duration(milliseconds: 300));
       bubbleController.forward();
 
-      // 애니메이션 총 시간과 비슷하게 딜레이를 준 후 메인 화면으로 이동
+      // 3초 딜레이를 준 후 메인 화면으로 이동
       await Future.delayed(const Duration(seconds: 3));
 
       // 화면 전환
       Navigator.of(
         context,
-      ).pushReplacement(MaterialPageRoute(builder: (context) => Homepage()));
+      ).pushReplacement(MaterialPageRoute(builder: (context) => SignupPage()));
     });
   }
 

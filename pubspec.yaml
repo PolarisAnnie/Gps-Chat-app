@@ -38,6 +38,7 @@ dependencies:
   firebase_auth: ^6.0.0
   cloud_firestore: ^6.0.0
   geolocator: ^14.0.2
+  geocoding: ^4.0.0 # 소린 추가: 좌표를 주소로 변환하기 위함
   permission_handler: ^12.0.1
   image_picker: ^1.0.4  # 추가
   flutter_native_splash: ^2.4.6
