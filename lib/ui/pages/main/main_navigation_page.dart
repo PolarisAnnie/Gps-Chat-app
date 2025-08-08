@@ -11,7 +11,7 @@ class MainNavigationPage extends StatefulWidget {
 class _MainNavigationPageState extends State<MainNavigationPage> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [Homepage(), ChatPage(), profilepage()];
+  final List<Widget> _pages = [Homepage(), ChatPage(), ProfilePage()];
 
   @override
   Widget build(BuildContext context) {

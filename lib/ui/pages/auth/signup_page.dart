@@ -14,7 +14,7 @@ class _SignupPageState extends State<SignupPage> {
   bool _isFilled = false;
 
   // 여기서 서버랑 통신해서 닉네임 목록 관리하기!! 지금은 임시 리스트
-  final List<String> _nicknameList = ['user1', '기요미', '으니으니', '우형우형', '영호영호'];
+  final List<String> _nicknameList = ['user1', '기요미짱', '으니으니', '우형우형', '영호영호'];
 
   @override
   void initState() {
@@ -163,7 +163,7 @@ class _SignupPageState extends State<SignupPage> {
                           ),
                           isDense: false,
                           contentPadding: EdgeInsets.symmetric(
-                            vertical: 18.0,
+                            vertical: 16.0,
                             horizontal: 0.0,
                           ),
                           errorText: _errorText,
