@@ -42,10 +42,14 @@ dependencies:
   permission_handler: ^12.0.1
   image_picker: ^1.0.4  # 추가
   flutter_native_splash: ^2.4.6
+  flutter_riverpod: ^2.6.1 # 특강 추가
+  riverpod_annotation: ^2.6.1 # 특강 추가
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: ^2.4.14 # 특강 추가
+  riverpod_generator: ^2.6.1 # 특강 추가
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

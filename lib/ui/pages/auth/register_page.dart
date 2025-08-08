@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -44,11 +46,113 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
 
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _profileImage = image;
+      });
+      _validateForm(); // 이미지 선택 후 폼 유효성 검사
+    }
+  }
+
+  void _onNextPressed() {
+    if (!_isButtonEnabled) return;
+
+    // 데이터 가지고
+    final userData = {
+      'nickname': _nicknameController.text,
+      'introduction': _introController.text,
+      'profile_image': _profileImage?.path,
+    };
+
+    // 다음 단계로 이동
+    Navigator.pushNamed(context, '/location', arguments: userData);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Register')),
-      body: Center(child: Text('Welcome ${widget.nickname}')),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('회원가입', style: TextStyle(fontWeight: FontWeight.bold)),
+          centerTitle: true,
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                children: [
+                  // 프로필 이미지 선택
+                  Center(
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage: _profileImage != null
+                                ? FileImage(File(_profileImage!.path))
+                                : null,
+                            child: _profileImage == null
+                                ? Icon(
+                                    Icons.person,
+                                    size: 50,
+                                    color: Colors.grey,
+                                  )
+                                : null,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.camera_alt,
+                                size: 20,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  // 닉네임 입력
+                  TextField(
+                    controller: _nicknameController,
+                    decoration: InputDecoration(
+                      labelText: '닉네임',
+                      hintText: '사용할 이름을 입력해주세요',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  // 소개글 입력
+                  TextField(
+                    controller: _introController,
+                    decoration: InputDecoration(
+                      labelText: '소개',
+                      hintText: '가볍게 나에 대한 소개를 작성해주세요',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 5,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

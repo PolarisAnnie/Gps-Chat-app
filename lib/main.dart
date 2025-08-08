@@ -42,9 +42,12 @@ class MyApp extends StatelessWidget {
       routes: {
         '/splash': (context) => const SplashPage(),
         '/signup': (context) => SignupPage(),
-        '/register': (context) => RegisterPage(
-          nickname: ModalRoute.of(context)?.settings.arguments as String? ?? '',
-        ),
+        '/register': (context) {
+          final args =
+              ModalRoute.of(context)?.settings.arguments
+                  as Map<String, dynamic>?;
+          return RegisterPage(nickname: args?['nickname'] as String? ?? '');
+        },
         '/location': (context) => LocationSettings(
           userData:
               ModalRoute.of(context)!.settings.arguments
