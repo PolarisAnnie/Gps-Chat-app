@@ -19,8 +19,7 @@ class _ChatPageState extends State<ChatPage> {
           chatId: 2, //TODO: 자동 생성
           content: content,
           createdAt: DateTime.now(),
-          senderId: 1, //TODO: 유저 아이디로 연결
-          messageType: '', // TODO: 내가 보낸 메시지
+          isSent: true, // TODO: 내가 보낸 메시지
         ),
       );
     });
