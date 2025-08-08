@@ -69,45 +69,25 @@ List<ChatRoom> _getSampleChatRooms() {
     ChatRoom(
       roomId: 1,
       currentUserId: 100, // 내 ID
-      otherUser: User(
-        userId: 1,
-        nickname: '영호느님',
-        introduction: '안녕하세요!',
-        imageUrl: 'https://example.com/user1.jpg',
-        latitude: 37.497942,
-        longitude: 127.027621,
-        address: '서울시 강남구',
-      ),
-      messages: [],
+      otherUserId: 1, // 상대 유저 ID
       createdAt: DateTime.now(),
       lastMessage: ChatMessage(
         chatId: 1,
-        senderId: 1,
         content: '안녕하세요',
         createdAt: DateTime.now(),
-        messageType: '',
+        isSent: true,
       ),
     ),
     ChatRoom(
       roomId: 2,
       currentUserId: 100, // 내 ID
-      otherUser: User(
-        userId: 2,
-        nickname: '우니스',
-        introduction: '안녕하세요!',
-        imageUrl: 'https://example.com/user1.jpg',
-        latitude: 37.497942,
-        longitude: 127.027621,
-        address: '서울시 강남구',
-      ),
-      messages: [],
+      otherUserId: 2, // 상대 유저 ID
       createdAt: DateTime.now(),
       lastMessage: ChatMessage(
         chatId: 2,
-        senderId: 2,
         content: '안녕하세요',
         createdAt: DateTime.now(),
-        messageType: '',
+        isSent: false,
       ),
     ),
   ];

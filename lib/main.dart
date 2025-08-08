@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // dotenv import
 import 'package:gps_chat_app/firebase_options.dart';
 import 'package:gps_chat_app/ui/pages/home/home_empty_page.dart';
 import 'package:gps_chat_app/ui/pages/home/home_page.dart';
-import 'package:gps_chat_app/ui/pages/home/member_detail.dart';
 import 'package:gps_chat_app/ui/pages/auth/register_page.dart';
 import 'package:gps_chat_app/ui/pages/auth/signup_page.dart';
 import 'package:gps_chat_app/ui/pages/chat/chat_page.dart';
