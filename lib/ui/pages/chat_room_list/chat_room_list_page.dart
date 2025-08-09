@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
 import 'package:gps_chat_app/data/model/chat_room.dart';
-import 'package:gps_chat_app/data/model/user.dart';
+import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/ui/pages/chat/chat_page.dart';
 import 'package:gps_chat_app/ui/pages/chat_room_list/widgets/chat_room_item.dart';
 
