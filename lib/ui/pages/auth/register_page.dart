@@ -1,6 +1,10 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:gps_chat_app/data/model/user_model.dart';
+import 'package:gps_chat_app/data/repository/storage_repository.dart';
+import 'package:gps_chat_app/data/repository/user_repository.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -12,11 +16,17 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  // firebase repository 인스턴스
+  final UserRepository _userRepository = UserRepository();
+  final StorageRepository _storageRepository = StorageRepository();
+
+  // 컨트롤러를 사용해서 닉네임과 소개글을 관리
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _introController = TextEditingController();
 
   XFile? _profileImage;
   bool _isButtonEnabled = false;
+  bool _isLoading = false; // 로딩 상태 추가
 
   @override
   void initState() {
@@ -57,18 +67,55 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  void _onNextPressed() {
+  void _onNextPressed() async {
     if (!_isButtonEnabled) return;
 
-    final userData = {
-      'nickname': _nicknameController.text,
-      'introduction': _introController.text,
-      'imagePath':
-          _profileImage?.path, // 이거 키 이름을 'imagePath'로 통일하지 않아서 오류났었음ㅎㅎ
-    };
+    setState(() {
+      _isLoading = true; // 로딩 시작
+    });
 
-    // 다음 단계로 이동
-    Navigator.pushNamed(context, '/location', arguments: userData);
+    try {
+      // 1. Firestore에서 미리 고유한 userId를 생성
+      final userId = FirebaseFirestore.instance.collection('users').doc().id;
+      // 2. 프로필 이미지를 Firebase Storage에 업로드
+      final imageUrl = await _storageRepository.uploadProfileImage(
+        filePath: _profileImage!.path, // 선택한 이미지의 로컬 경로
+        userId: userId,
+      );
+      // 3. 이미지 업로드 실패 시, 사용자에게 알리고 함수 종료
+      if (imageUrl == null) {
+        throw Exception('프로필 이미지 업로드에 실패했습니다.');
+      }
+      // 4. User 객체 생성 (위치정보는 아직 없음)
+
+      final newUser = User(
+        userId: userId,
+        nickname: _nicknameController.text,
+        introduction: _introController.text,
+        imageUrl: imageUrl,
+        // 위치 정보는 다음페이지에서 업데이트될것임
+        location: GeoPoint(0, 0),
+        address: '',
+      );
+
+      // 5. UserRepository를 사용하여 Firestore에 사용자 정보 추가
+      final bool isSuccess = await _userRepository.addUser(newUser);
+
+      if (isSuccess) {
+        // 다음 단계로 이동
+        Navigator.pushNamed(context, '/location', arguments: newUser);
+      } else {
+        throw Exception('사용자 정보 저장에 실패했습니다.');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      setState(() {
+        _isLoading = false; // 로딩 종료
+      });
+    }
   }
 
   @override
@@ -173,7 +220,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _isButtonEnabled ? _onNextPressed : null,
+                    onPressed: _isButtonEnabled && !_isLoading
+                        ? _onNextPressed
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
@@ -183,13 +232,22 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       disabledBackgroundColor: Colors.grey.shade600,
                     ),
-                    child: Text(
-                      '다음 단계로',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            '다음 단계로',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
               ],

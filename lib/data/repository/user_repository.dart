@@ -59,4 +59,21 @@ class UserRepository {
       return null; // 오류 발생 시 null 반환
     }
   }
+
+  Future<bool> updateUserLocation({
+    required String userId,
+    required GeoPoint location,
+    String? address,
+  }) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({
+        'location': location,
+        'address': address,
+      });
+      return true; // 성공적으로 업데이트되면 true 반환
+    } catch (e) {
+      print('위치 정보 업데이트 실패: $e');
+      return false; // 오류 발생 시 false 반환
+    }
+  }
 }

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -9,9 +7,9 @@ import 'package:gps_chat_app/data/repository/storage_repository.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
 
 class LocationSettings extends StatefulWidget {
-  final Map<String, dynamic> userData;
+  final User user;
 
-  const LocationSettings({super.key, required this.userData});
+  const LocationSettings({super.key, required this.user});
 
   @override
   State<LocationSettings> createState() => _LocationSettingsState();
@@ -48,7 +46,7 @@ class _LocationSettingsState extends State<LocationSettings> {
     });
   }
 
-  // _onStartButtonPressed 메서드
+  // _onStartButtonPressed 메서드 (정보를 업데이트하도록 변경)
   void _onStartButtonPressed() async {
     if (!_isButtonEnabled || _isLoading || _currentPosition == null) return;
 
@@ -56,56 +54,40 @@ class _LocationSettingsState extends State<LocationSettings> {
       _isLoading = true;
     });
 
-    // 1. Firestore에서 미리 고유한 userId를 생성
-    final userId = FirebaseFirestore.instance.collection('users').doc().id;
+    try {
+      // 1. 새로운 위치 정보 생성
+      final newLocation = GeoPoint(
+        _currentPosition!.latitude,
+        _currentPosition!.longitude,
+      );
 
-    // 2. 프로필 이미지를 Firebase Storage에 업로드
-    final imageUrl = await _storageRepository.uploadProfileImage(
-      filePath: widget.userData['imagePath'], // RegisterPage에서 넘겨받은 로컬 경로
-      userId: userId,
-    );
+      // 2. UserRepository를 사용하여 Firestore에 사용자 정보 업데이트
+      final bool isSuccess = await _userRepository.updateUserLocation(
+        userId: widget.user.userId,
 
-    // 3. 이미지 업로드 실패 시, 사용자에게 알리고 함수 종료
-    if (imageUrl == null) {
+        location: newLocation,
+        address: _locationAddress,
+      );
+
+      if (isSuccess) {
+        // 3. 성공적으로 업데이트되면 홈 화면으로 이동
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/home',
+          (route) => false, // 모든 이전 화면 제거
+        );
+      } else {
+        throw Exception('위치 정보 업데이트에 실패했습니다.');
+      }
+    } catch (e) {
+      print('위치 정보 업데이트 중 오류 발생: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('위치 정보 업데이트 중 오류가 발생했습니다.')));
+    } finally {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('프로필 이미지 업로드에 실패했습니다.')));
-      return;
-    }
-
-    // 4. 모든 정보(업로드된 이미지 URL, 위치 정보 등)를 포함하여 User 객체 생성
-    final newUser = User(
-      userId: userId,
-      nickname: widget.userData['nickname'],
-      introduction: widget.userData['introduction'],
-      imageUrl: imageUrl,
-      location: GeoPoint(
-        _currentPosition!.latitude,
-        _currentPosition!.longitude,
-      ),
-      address: _locationAddress,
-    );
-
-    // 5. UserRepository를 사용하여 Firestore에 사용자 정보 저장
-    final bool isSuccess = await _userRepository.addUser(newUser);
-
-    setState(() {
-      _isLoading = false;
-    });
-
-    if (isSuccess) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/home',
-        (route) => false, // 모든 이전 화면 제거
-      );
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('사용자 정보를 저장하는 데 실패했습니다.')));
     }
   }
 
@@ -132,16 +114,17 @@ class _LocationSettingsState extends State<LocationSettings> {
                 children: [
                   CircleAvatar(
                     radius: 40,
-                    // FileImage를 사용하여 로컬 이미지 표시
-                    backgroundImage: widget.userData['imagePath'] != null
-                        ? FileImage(File(widget.userData['imagePath']))
+                    // networkImage를 사용하여 전달받은 User 객체의 이미지 경로를 사용
+                    backgroundImage: widget.user.imageUrl != null
+                        ? NetworkImage(widget.user.imageUrl)
                         : AssetImage('assets/images/profile_grey.png')
                               as ImageProvider,
                   ),
                   SizedBox(width: 20),
                   Expanded(
                     child: Text(
-                      '${widget.userData['nickname']}님의\n위치 정보 가져오기',
+                      // User 객체로부터 닉네임 가져와서 표시
+                      '${widget.user.nickname}님의\n위치 정보 가져오기',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,

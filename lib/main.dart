@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // dotenv import
+import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/firebase_options.dart';
-import 'package:gps_chat_app/ui/pages/home/home_empty_page.dart';
 import 'package:gps_chat_app/ui/pages/home/home_page.dart';
 import 'package:gps_chat_app/ui/pages/auth/register_page.dart';
 import 'package:gps_chat_app/ui/pages/auth/signup_page.dart';
@@ -51,9 +51,7 @@ class MyApp extends StatelessWidget {
           return RegisterPage(nickname: args?['nickname'] as String? ?? '');
         },
         '/location': (context) => LocationSettings(
-          userData:
-              ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>,
+          user: ModalRoute.of(context)!.settings.arguments as User,
         ),
         '/profile': (context) => ProfilePage(),
         '/home': (context) => HomePage(),
