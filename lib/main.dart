@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // dotenv import
+import 'package:gps_chat_app/core/theme/theme.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/firebase_options.dart';
 import 'package:gps_chat_app/ui/pages/home/home_page.dart';
@@ -30,16 +31,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'GPS Chat App',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        fontFamily: 'paperlogy',
-        scaffoldBackgroundColor: Colors.white,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          elevation: 0,
-        ),
-      ),
+      theme: AppTheme.lightTheme,
       home: SplashPage(),
       routes: {
         '/splash': (context) => const SplashPage(),

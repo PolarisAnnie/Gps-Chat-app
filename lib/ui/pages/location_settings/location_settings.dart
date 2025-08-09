@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:gps_chat_app/core/theme/theme.dart';
 import 'package:gps_chat_app/core/utils/location_utils.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
-import 'package:gps_chat_app/data/repository/storage_repository.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
 
 class LocationSettings extends StatefulWidget {
@@ -17,7 +17,6 @@ class LocationSettings extends StatefulWidget {
 
 class _LocationSettingsState extends State<LocationSettings> {
   final UserRepository _userRepository = UserRepository();
-  final StorageRepository _storageRepository = StorageRepository();
 
   String _locationAddress = '위치 정보를 가져와주세요.';
   Position? _currentPosition;
@@ -64,7 +63,6 @@ class _LocationSettingsState extends State<LocationSettings> {
       // 2. UserRepository를 사용하여 Firestore에 사용자 정보 업데이트
       final bool isSuccess = await _userRepository.updateUserLocation(
         userId: widget.user.userId,
-
         location: newLocation,
         address: _locationAddress,
       );
@@ -94,13 +92,7 @@ class _LocationSettingsState extends State<LocationSettings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '위치 설정',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text('위치 설정'), centerTitle: true),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(32.0),
@@ -115,10 +107,8 @@ class _LocationSettingsState extends State<LocationSettings> {
                   CircleAvatar(
                     radius: 40,
                     // networkImage를 사용하여 전달받은 User 객체의 이미지 경로를 사용
-                    backgroundImage: widget.user.imageUrl != null
-                        ? NetworkImage(widget.user.imageUrl)
-                        : AssetImage('assets/images/profile_grey.png')
-                              as ImageProvider,
+                    backgroundImage: NetworkImage(widget.user.imageUrl),
+                    backgroundColor: Colors.grey.shade200,
                   ),
                   SizedBox(width: 20),
                   Expanded(
@@ -126,8 +116,9 @@ class _LocationSettingsState extends State<LocationSettings> {
                       // User 객체로부터 닉네임 가져와서 표시
                       '${widget.user.nickname}님의\n위치 정보 가져오기',
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: AppTheme.titleFontSize,
                         fontWeight: FontWeight.bold,
+                        color: AppTheme.textPrimary,
                       ),
                     ),
                   ),
@@ -141,7 +132,11 @@ class _LocationSettingsState extends State<LocationSettings> {
                 children: [
                   Text(
                     '현재 위치',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   SizedBox(height: 10),
                   Container(
@@ -163,8 +158,8 @@ class _LocationSettingsState extends State<LocationSettings> {
                                 style: TextStyle(
                                   fontSize: 18,
                                   color: _isButtonEnabled
-                                      ? Colors.black
-                                      : Colors.grey.shade700,
+                                      ? AppTheme.textPrimary
+                                      : AppTheme.textTertiary,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -173,7 +168,7 @@ class _LocationSettingsState extends State<LocationSettings> {
                               IconButton(
                                 icon: Icon(
                                   Icons.location_on,
-                                  color: Colors.blue,
+                                  color: AppTheme.primaryColor,
                                   size: 30,
                                 ),
                                 onPressed: _isLoading ? null : _fetchLocation,
@@ -193,8 +188,8 @@ class _LocationSettingsState extends State<LocationSettings> {
                     ? _onStartButtonPressed
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: AppTheme.textOnPrimary,
                   padding: EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
@@ -206,13 +201,16 @@ class _LocationSettingsState extends State<LocationSettings> {
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
-                          color: Colors.white,
+                          color: AppTheme.textOnPrimary,
                           strokeWidth: 3.0,
                         ),
                       )
                     : Text(
                         '시작하기',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: AppTheme.textOnPrimary,
+                        ),
                       ),
               ),
             ],
