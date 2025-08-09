@@ -60,11 +60,11 @@ class _RegisterPageState extends State<RegisterPage> {
   void _onNextPressed() {
     if (!_isButtonEnabled) return;
 
-    // 다음 페이지로 전달할 데이터의 키를 'imagePath'로 통일
     final userData = {
       'nickname': _nicknameController.text,
       'introduction': _introController.text,
-      'profile_image': _profileImage?.path,
+      'imagePath':
+          _profileImage?.path, // 이거 키 이름을 'imagePath'로 통일하지 않아서 오류났었음ㅎㅎ
     };
 
     // 다음 단계로 이동
