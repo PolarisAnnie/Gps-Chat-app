@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      home: Home(),
+      home: SplashPage(),
       routes: {
         '/splash': (context) => const SplashPage(),
         '/signup': (context) => SignupPage(),

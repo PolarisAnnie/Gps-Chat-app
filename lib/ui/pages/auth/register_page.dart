@@ -60,7 +60,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void _onNextPressed() {
     if (!_isButtonEnabled) return;
 
-    // 데이터 가지고
+    // 다음 페이지로 전달할 데이터의 키를 'imagePath'로 통일
     final userData = {
       'nickname': _nicknameController.text,
       'introduction': _introController.text,
@@ -80,92 +80,120 @@ class _RegisterPageState extends State<RegisterPage> {
           title: Text('회원가입', style: TextStyle(fontWeight: FontWeight.bold)),
           centerTitle: true,
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  children: [
-                    // 프로필 이미지 선택
-                    Center(
-                      child: GestureDetector(
-                        onTap: _pickImage,
-                        child: Stack(
-                          children: [
-                            CircleAvatar(
-                              radius: 50,
-                              backgroundImage: _profileImage != null
-                                  ? FileImage(File(_profileImage!.path))
-                                  : null,
-                              child: _profileImage == null
-                                  ? Icon(
-                                      Icons.person,
-                                      size: 50,
-                                      color: Colors.grey,
-                                    )
-                                  : null,
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Container(
-                                padding: EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.camera_alt,
-                                  size: 20,
-                                  color: Colors.white,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView(
+                    children: [
+                      // 프로필 이미지 선택
+                      Center(
+                        child: GestureDetector(
+                          onTap: _pickImage,
+                          child: Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 50,
+                                backgroundImage: _profileImage != null
+                                    ? FileImage(File(_profileImage!.path))
+                                    : null,
+                                child: _profileImage == null
+                                    ? Icon(
+                                        Icons.person,
+                                        size: 50,
+                                        color: Colors.grey,
+                                      )
+                                    : null,
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  padding: EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.camera_alt,
+                                    size: 20,
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 40),
-                    // 닉네임 입력
-                    TextField(
-                      controller: _nicknameController,
-                      decoration: InputDecoration(
-                        labelText: '닉네임',
-                        labelStyle: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                      SizedBox(height: 40),
+                      // 닉네임 입력
+                      TextField(
+                        controller: _nicknameController,
+                        decoration: InputDecoration(
+                          labelText: '닉네임',
+                          labelStyle: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                          hintText: '사용할 이름을 입력해주세요',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          border: UnderlineInputBorder(),
+                          floatingLabelBehavior: FloatingLabelBehavior.always,
                         ),
-                        hintText: '사용할 이름을 입력해주세요',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        border: UnderlineInputBorder(),
-                        floatingLabelBehavior: FloatingLabelBehavior.always,
                       ),
-                    ),
-                    SizedBox(height: 30),
-                    SizedBox(
-                      child: Text(
-                        '소개',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      SizedBox(height: 30),
+                      SizedBox(
+                        child: Text(
+                          '소개',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
+                      SizedBox(height: 10),
 
-                    // 소개글 입력
-                    TextField(
-                      controller: _introController,
-                      decoration: InputDecoration(
-                        hintText: '가볍게 나에 대한 소개를 작성해주세요',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        border: OutlineInputBorder(),
+                      // 소개글 입력
+                      TextField(
+                        controller: _introController,
+                        decoration: InputDecoration(
+                          hintText: '가볍게 나에 대한 소개를 작성해주세요',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLines: 5,
                       ),
-                      maxLines: 5,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                // 다음 단계로 이동 버튼
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isButtonEnabled ? _onNextPressed : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      disabledBackgroundColor: Colors.grey.shade600,
+                    ),
+                    child: Text(
+                      '다음 단계로',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

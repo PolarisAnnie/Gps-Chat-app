@@ -1,5 +1,5 @@
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:gps_chat_app/core/services/naver_map_service.dart';
 
 class LocationData {
   final Position position;
@@ -9,17 +9,16 @@ class LocationData {
 }
 
 class LocationUtils {
-  /// 현재 위치 정보를 가져와 LocationData 객체로 반환합니다.
+  /// 현재 위치 정보를 가져와 LocationData 객체로 반환하는 코드!
   ///
-  /// 권한이 없거나 오류 발생 시 null을 반환합니다.
+  /// 권한이 없거나 오류 발생 시 null을 반환하기
   static Future<LocationData?> getCurrentLocationData() async {
     try {
       // 1. 위치 권한 확인 및 요청
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission != LocationPermission.whileInUse &&
-            permission != LocationPermission.always) {
+        if (permission == LocationPermission.denied) {
           // 권한이 최종적으로 거부된 경우
           return null;
         }
@@ -31,30 +30,20 @@ class LocationUtils {
       }
 
       // 2. 현재 위치(좌표) 가져오기
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+      Position position = await Geolocator.getCurrentPosition();
 
-      // 3. 좌표를 주소로 변환
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+      // 3. NaverMapService 객체를 생성하고, 좌표를 주소로 변환하기
+      final naverMapService = NaverMapService();
+      String? address = await naverMapService.getAddressFromCoords(position);
 
-      if (placemarks.isNotEmpty) {
-        Placemark place = placemarks[0];
-
-        // 4. '시 구 동' 형식으로 주소 가공
-        String address =
-            '${place.locality} ${place.subLocality} ${place.thoroughfare}';
-
+      if (address != null) {
+        // 4. 위치 데이터와 변환된 주소 문자열을 LocationData 객체로 반환함
         return LocationData(position: position, address: address);
-      } else {
-        return null;
       }
     } catch (e) {
-      print('LocationUtils 오류: $e');
-      return null;
+      print('위치 정보를 가져오는 데 실패했습니다: $e');
+      return null; // 오류 발생 시 null 반환
     }
+    return null; // 주소 변환 실패 시 null 반환
   }
 }
