@@ -13,7 +13,6 @@ class User {
   // final double longitude; // 경도
   final GeoPoint location; // 위치 정보 (GeoPoint 사용)
   final String? address; // 읽기 쉬운 주소
-<<<<<<< HEAD
 
   double get distance => _distance;
   set distance(double value) {
@@ -21,8 +20,6 @@ class User {
   }
 
   double _distance = 0.0;
-=======
->>>>>>> dev
 
   User({
     required this.userId,
