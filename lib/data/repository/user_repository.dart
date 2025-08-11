@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 
 class UserRepository {
@@ -9,7 +10,7 @@ class UserRepository {
       await _firestore.collection('users').doc(user.userId).set(user.toJson());
       return true; // 성공적으로 추가되면 true 반환
     } catch (e) {
-      print(e);
+      debugPrint('사용자 추가 실패: ${e.toString()}');
       return false; // 오류 발생 시 false 반환
     }
   }
@@ -24,7 +25,7 @@ class UserRepository {
 
       return result.docs.isNotEmpty; // 닉네임이 존재하면 true, 아니면 false
     } catch (e) {
-      print(e);
+      debugPrint('닉네임 중복 체크 실패: ${e.toString()}');
       return false; // 오류 발생 시 false 반환
     }
   }
@@ -40,7 +41,7 @@ class UserRepository {
       }
       return null; // 유저가 존재하지 않으면 null 반환
     } catch (e) {
-      print('사용자 정보 가져오기 실패: $e');
+      debugPrint('사용자 정보 가져오기 실패: ${e.toString()}');
       return null; // 오류 발생 시 null 반환
     }
   }
@@ -58,7 +59,7 @@ class UserRepository {
       }
       return null; // 유저가 존재하지 않으면 null 반환
     } catch (e) {
-      print(e);
+      debugPrint('닉네임으로 사용자 조회 실패: ${e.toString()}');
       return null; // 오류 발생 시 null 반환
     }
   }
@@ -75,7 +76,7 @@ class UserRepository {
       });
       return true; // 성공적으로 업데이트되면 true 반환
     } catch (e) {
-      print('위치 정보 업데이트 실패: $e');
+      debugPrint('위치 정보 업데이트 실패: ${e.toString()}');
       return false; // 오류 발생 시 false 반환
     }
   }
@@ -90,7 +91,7 @@ class UserRepository {
       });
       return true;
     } catch (e) {
-      print('사용자 정보 업데이트 실패: $e');
+      debugPrint('사용자 정보 업데이트 실패: ${e.toString()}');
       return false;
     }
   }
@@ -114,7 +115,7 @@ class UserRepository {
       }
       return false; // 중복 없음
     } catch (e) {
-      print('닉네임 중복 체크 실패: $e');
+      debugPrint('닉네임 중복 체크 실패: ${e.toString()}');
       return false;
     }
   }
