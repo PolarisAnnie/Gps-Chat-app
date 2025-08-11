@@ -6,6 +6,8 @@ import 'package:gps_chat_app/ui/pages/chat/chat_page.dart';
 import 'package:gps_chat_app/ui/pages/chat_room_list/widgets/chat_room_item.dart';
 
 class ChatRoomListPage extends StatelessWidget {
+  const ChatRoomListPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     //TODO : 샘플 데이터 생성 (추후 firebase에서 추가)

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ChatReceiveItem extends StatelessWidget {
-  ChatReceiveItem({
+  const ChatReceiveItem({
+    super.key,
     required this.imageUrl,
     required this.content,
     required this.dateTime,

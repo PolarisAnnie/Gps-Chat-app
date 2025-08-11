@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'api.dart'; // NaverApiService import
+// NaverApiService import
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

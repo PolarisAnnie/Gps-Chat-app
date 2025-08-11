@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ChatBottomSheet extends StatefulWidget {
-  ChatBottomSheet(this.bottomPadding, this.onSend);
+  const ChatBottomSheet(this.bottomPadding, this.onSend, {super.key});
 
   final double bottomPadding;
   final Function(String) onSend;

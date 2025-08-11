@@ -5,6 +5,8 @@ import 'package:gps_chat_app/ui/pages/chat/widgets/chat_recieve_item.dart';
 import 'package:gps_chat_app/ui/pages/chat/widgets/chat_send_item.dart';
 
 class ChatPage extends StatefulWidget {
+  const ChatPage({super.key});
+
   @override
   State<ChatPage> createState() => _ChatPageState();
 }

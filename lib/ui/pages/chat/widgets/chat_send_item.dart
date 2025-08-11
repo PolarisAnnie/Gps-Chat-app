@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class ChatSendItem extends StatelessWidget {
-  ChatSendItem({
+  const ChatSendItem({
+    super.key,
     required this.imageUrl,
     required this.content,
     required this.dateTime,
@@ -48,7 +49,7 @@ class ChatSendItem extends StatelessWidget {
           ),
         ),
         SizedBox(width: 8),
-        Container(
+        SizedBox(
           height: 32,
           width: 32,
           //decoration: BoxDecoration(shape: BoxShape.circle),

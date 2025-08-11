@@ -4,6 +4,8 @@ import '../chat/chat_page.dart';
 import '../profile/profile_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
+  const MainNavigationPage({super.key});
+
   @override
   _MainNavigationPageState createState() => _MainNavigationPageState();
 }
