@@ -52,12 +52,36 @@ class _SignupPageState extends ConsumerState<SignupPage> {
           final isIncomplete = await authNotifier.isIncompleteUser(nickname);
 
           if (isIncomplete) {
-            // 위치설정만 안한 유저인 경우, 바로 위치설정 페이지로 이동
-            if (mounted) {
-              Navigator.pushReplacementNamed(
-                context,
-                '/location',
-                arguments: nickname,
+            // 위치설정만 안한 유저인 경우, 실제 User 객체를 가져와서 위치설정 페이지로 이동
+            final user = await authNotifier.getUserByNickname(nickname);
+            if (mounted && user != null) {
+              showCupertinoDialog(
+                context: context,
+                builder: (context) {
+                  return CupertinoAlertDialog(
+                    title: const Text('이어서 진행'),
+                    content: const Text('\n입력하시던 정보가 있습니다.\n위치 설정 페이지로 이동합니다.'),
+                    actions: [
+                      CupertinoDialogAction(
+                        isDefaultAction: true,
+                        child: const Text(
+                          '확인',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: () {
+                          // 현재 다이얼로그 닫기
+                          Navigator.pop(context);
+                          // 위치 설정 페이지로 이동
+                          Navigator.pushReplacementNamed(
+                            context,
+                            '/location',
+                            arguments: user,
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
               );
             }
           } else {
