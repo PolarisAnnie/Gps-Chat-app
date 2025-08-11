@@ -48,12 +48,16 @@ dependencies:
   intl: ^0.20.2
   dio: ^5.1.0
   flutter_riverpod: ^2.6.1
+  freezed_annotation: ^2.4.4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: ^2.4.14 # 특강 추가
   riverpod_generator: ^2.6.1 # 특강 추가
+  freezed: ^2.5.7
+  json_annotation: ^4.9.0
+  json_serializable: ^6.8.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

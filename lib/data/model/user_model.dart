@@ -12,7 +12,7 @@ class User {
   // final double latitude; // 위도
   // final double longitude; // 경도
   final GeoPoint location; // 위치 정보 (GeoPoint 사용)
-  final String? address; // 읽기 쉬운 주소(선택적)
+  final String? address; // 읽기 쉬운 주소
 
   User({
     required this.userId,

@@ -2,15 +2,17 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart'; // dotenv import
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // riverpod import
+
 import 'package:gps_chat_app/core/theme/theme.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/firebase_options.dart';
-import 'package:gps_chat_app/ui/pages/home/home_page.dart';
+
+import 'package:gps_chat_app/ui/pages/main/main_navigation_page.dart';
 import 'package:gps_chat_app/ui/pages/auth/register_page.dart';
 import 'package:gps_chat_app/ui/pages/auth/signup_page.dart';
 import 'package:gps_chat_app/ui/pages/chat/chat_page.dart';
 import 'package:gps_chat_app/ui/pages/location_settings/location_settings.dart';
-import 'package:gps_chat_app/ui/pages/profile/profile_page.dart';
 import 'package:gps_chat_app/ui/pages/splash/splash_page.dart';
 
 Future<void> main() async {
@@ -20,7 +22,7 @@ Future<void> main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -32,7 +34,7 @@ class MyApp extends StatelessWidget {
       title: 'GPS Chat App',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: SplashPage(),
+      home: const SplashPage(),
       routes: {
         '/splash': (context) => const SplashPage(),
         '/signup': (context) => SignupPage(),
@@ -45,9 +47,8 @@ class MyApp extends StatelessWidget {
         '/location': (context) => LocationSettings(
           user: ModalRoute.of(context)!.settings.arguments as User,
         ),
-        '/profile': (context) => ProfilePage(),
-        '/home': (context) => HomePage(),
-        '/chat': (context) => ChatPage(),
+        '/main': (context) => const MainNavigationPage(), // 메인 네비게이션으로 변경
+        '/chat': (context) => ChatPage(), // 개별 채팅방용
       },
     );
   }

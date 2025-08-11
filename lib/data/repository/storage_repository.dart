@@ -1,30 +1,90 @@
-// 이미지 업로드를 전담하는 리포지토리입니다!
-
 import 'dart:io';
+import 'dart:typed_data';
+import '../../../core/services/firebase_storage_service.dart';
 
-import 'package:firebase_storage/firebase_storage.dart';
-
+/// Storage Repository
+/// ViewModel과 Firebase Storage Service 사이의 데이터 계층
+/// Repository 패턴을 통해 서비스 계층을 추상화하고 비즈니스 로직을 분리
 class StorageRepository {
-  final FirebaseStorage _storage = FirebaseStorage.instance;
-
-  // 프로필 이미지를 firebase storage에 업로드하고, 다운로드 URL을 반환합니다.
+  /// 프로필 이미지 업로드
   Future<String?> uploadProfileImage({
     required String filePath,
     required String userId,
   }) async {
     try {
-      // Storage에 저장될 파일 reference 생성 (예: 'profile_images/userId.jpg')
-      final ref = _storage.ref().child('profile_images').child('$userId.jpg');
-
-      // 파일 업로드
-      final uploadTask = await ref.putFile(File(filePath));
-
-      // 업로드 완료 후 다운로드 URL 가져오기
-      final downloadUrl = await uploadTask.ref.getDownloadURL();
-      return downloadUrl; // 다운로드 URL 반환
+      final file = File(filePath);
+      return await FirebaseStorageService.uploadImageFile(
+        file: file,
+        path: 'profile_images',
+        fileName: '$userId.jpg',
+      );
     } catch (e) {
-      print('StorageRepository: 이미지 업로드 실패 - $e');
-      return null; // 오류 발생 시 null 반환
+      return null;
     }
+  }
+
+  /// 채팅 이미지 업로드
+  Future<String?> uploadChatImage({
+    required File file,
+    required String chatRoomId,
+  }) async {
+    try {
+      return await FirebaseStorageService.uploadImageFile(
+        file: file,
+        path: 'chat_images/$chatRoomId',
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// 이미지 데이터 업로드 (Uint8List)
+  Future<String?> uploadImageData({
+    required Uint8List data,
+    required String path,
+    String? fileName,
+    String? contentType,
+  }) async {
+    try {
+      return await FirebaseStorageService.uploadImageData(
+        data: data,
+        path: path,
+        fileName: fileName,
+        contentType: contentType,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// 이미지 삭제
+  Future<bool> deleteImage(String imageUrl) async {
+    try {
+      return await FirebaseStorageService.deleteImage(imageUrl);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /// 폴더 내 이미지 목록 가져오기
+  Future<List<String>> getImagesFromFolder(String folderPath) async {
+    try {
+      return await FirebaseStorageService.getImagesFromFolder(folderPath);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// 업로드 진행률 스트림
+  Stream<double> uploadWithProgress({
+    required File file,
+    required String path,
+    String? fileName,
+  }) {
+    return FirebaseStorageService.uploadWithProgress(
+      file: file,
+      path: path,
+      fileName: fileName,
+    );
   }
 }
