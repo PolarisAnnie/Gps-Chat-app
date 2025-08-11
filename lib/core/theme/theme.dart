@@ -41,17 +41,17 @@ class AppTheme {
 
     // 앱바 테마
     appBarTheme: AppBarTheme(
-      backgroundColor: primaryColor,
-      foregroundColor: textOnPrimary,
+      backgroundColor: backgroundColor,
+      foregroundColor: textPrimary,
       elevation: 0,
-      centerTitle: false,
+      centerTitle: true,
       titleTextStyle: TextStyle(
         fontFamily: 'Paperlogy',
         fontSize: appBarFontSize,
         fontWeight: FontWeight.w600,
-        color: textOnPrimary,
+        color: textPrimary,
       ),
-      iconTheme: IconThemeData(color: textOnPrimary, size: 24),
+      iconTheme: IconThemeData(color: textPrimary, size: 24),
     ),
   );
 }
