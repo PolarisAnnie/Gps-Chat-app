@@ -53,7 +53,7 @@ class ProfilePage extends ConsumerWidget {
     }
 
     if (state.user == null) {
-      return _buildErrorState(viewModel);
+      return _buildErrorState(context, viewModel);
     }
 
     return SingleChildScrollView(
@@ -64,6 +64,8 @@ class ProfilePage extends ConsumerWidget {
           const SizedBox(height: 32),
           if (!state.isEditing) ...[
             _buildEditButton(viewModel),
+            const SizedBox(height: 16),
+            _buildLogoutButton(context, viewModel),
           ] else ...[
             ProfileEditForm(
               initialNickname: state.user!.nickname,
@@ -111,7 +113,97 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildErrorState(ProfileViewModel viewModel) {
+  Widget _buildLogoutButton(BuildContext context, ProfileViewModel viewModel) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: OutlinedButton(
+        onPressed: () => _showLogoutDialog(context, viewModel),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.red,
+          side: const BorderSide(color: Colors.red),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        child: const Text(
+          '로그아웃',
+          style: TextStyle(
+            fontFamily: 'Paperlogy',
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context, ProfileViewModel viewModel) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            '로그아웃',
+            style: TextStyle(
+              fontFamily: 'Paperlogy',
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          content: const Text(
+            '정말로 로그아웃하시겠습니까?',
+            style: TextStyle(
+              fontFamily: 'Paperlogy',
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                '취소',
+                style: TextStyle(
+                  fontFamily: 'Paperlogy',
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final success = await viewModel.logout();
+                if (success && context.mounted) {
+                  _showSnackBar(context, '로그아웃되었습니다.');
+                  // 로그인 페이지로 이동
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/signup', (route) => false);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                '로그아웃',
+                style: TextStyle(
+                  fontFamily: 'Paperlogy',
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, ProfileViewModel viewModel) {
     return Center(
       child: Container(
         padding: const EdgeInsets.all(24),
@@ -136,7 +228,7 @@ class ProfilePage extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             const Text(
-              '사용자 정보를 찾을 수 없습니다',
+              '로그인이 필요합니다',
               style: TextStyle(
                 fontFamily: 'Paperlogy',
                 fontSize: 16,
@@ -146,30 +238,60 @@ class ProfilePage extends ConsumerWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              '네트워크 연결을 확인해주세요',
+              '프로필을 보려면 먼저 로그인해주세요',
               style: TextStyle(
                 fontFamily: 'Paperlogy',
                 fontSize: 14,
                 color: AppTheme.textSecondary.withValues(alpha: 0.7),
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: viewModel.loadUserData,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: viewModel.loadUserData,
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      '다시 시도',
+                      style: TextStyle(
+                        fontFamily: 'Paperlogy',
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              child: const Text(
-                '다시 시도',
-                style: TextStyle(
-                  fontFamily: 'Paperlogy',
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(
+                        context,
+                      ).pushNamedAndRemoveUntil('/signup', (route) => false);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      '로그인하기',
+                      style: TextStyle(
+                        fontFamily: 'Paperlogy',
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ],
         ),

@@ -1,7 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:firebase_auth/firebase_auth.dart' as auth;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
 
@@ -45,10 +43,8 @@ class ProfileState {
 // ProfileViewModel
 class ProfileViewModel extends StateNotifier<ProfileState> {
   final UserRepository _userRepository;
-  final auth.FirebaseAuth _auth;
 
-  ProfileViewModel(this._userRepository, this._auth)
-    : super(const ProfileState()) {
+  ProfileViewModel(this._userRepository) : super(const ProfileState()) {
     loadUserData();
   }
 
@@ -56,31 +52,18 @@ class ProfileViewModel extends StateNotifier<ProfileState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final authUser = _auth.currentUser;
-      User? userData;
+      // getCurrentUser 메서드로 실제 Firebase 사용자 데이터 가져오기
+      final userData = await _userRepository.getCurrentUser();
 
-      if (authUser != null) {
-        userData = await _userRepository.getUserById(authUser.uid);
-        userData ??= User(
-          userId: authUser.uid,
-          nickname: authUser.displayName ?? '사용자',
-          introduction: 'Flutter를 공부중',
-          imageUrl: authUser.photoURL ?? '',
-          location: const GeoPoint(37.5665, 126.9780),
-          address: '서울시 중구',
-        );
+      if (userData != null) {
+        state = state.copyWith(user: userData, isLoading: false);
       } else {
-        userData = User(
-          userId: 'test_user_1',
-          nickname: '올리브영털털이',
-          introduction: '안녕하세요 저는 flutter를 배우고 있습니다',
-          imageUrl: '',
-          location: const GeoPoint(37.5665, 126.9780),
-          address: '서울시 중구',
+        // 로그인된 사용자가 없는 경우 에러 처리
+        state = state.copyWith(
+          isLoading: false,
+          error: '로그인된 사용자를 찾을 수 없습니다. 다시 로그인해주세요.',
         );
       }
-
-      state = state.copyWith(user: userData, isLoading: false);
     } catch (e) {
       debugPrint('사용자 데이터 로드 실패: $e');
       state = state.copyWith(isLoading: false, error: '데이터를 불러오는데 실패했습니다.');
@@ -186,6 +169,20 @@ class ProfileViewModel extends StateNotifier<ProfileState> {
     }
   }
 
+  // 로그아웃 기능
+  Future<bool> logout() async {
+    try {
+      await _userRepository.logout();
+      // 상태 초기화
+      state = const ProfileState();
+      return true;
+    } catch (e) {
+      debugPrint('로그아웃 실패: $e');
+      state = state.copyWith(error: '로그아웃에 실패했습니다.');
+      return false;
+    }
+  }
+
   void clearError() {
     state = state.copyWith(error: null);
   }
@@ -195,13 +192,9 @@ class ProfileViewModel extends StateNotifier<ProfileState> {
 final userRepositoryProvider = Provider<UserRepository>(
   (ref) => UserRepository(),
 );
-final firebaseAuthProvider = Provider<auth.FirebaseAuth>(
-  (ref) => auth.FirebaseAuth.instance,
-);
 
 final profileViewModelProvider =
     StateNotifierProvider<ProfileViewModel, ProfileState>((ref) {
       final userRepository = ref.watch(userRepositoryProvider);
-      final firebaseAuth = ref.watch(firebaseAuthProvider);
-      return ProfileViewModel(userRepository, firebaseAuth);
+      return ProfileViewModel(userRepository);
     });
