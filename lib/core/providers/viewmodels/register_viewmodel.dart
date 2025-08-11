@@ -29,6 +29,14 @@ class RegisterViewModel extends StateNotifier<RegisterState> {
     state = newState.copyWith(isFormValid: _validateForm(newState));
   }
 
+<<<<<<< HEAD
+=======
+  /// 작성중인 데이터를 모두 초기화
+  void clearData() {
+    state = const RegisterState();
+  }
+
+>>>>>>> dev
   bool _validateForm(RegisterState state) {
     final isNicknameValid = state.nickname.length >= 4;
     final isIntroValid = state.introduction.isNotEmpty;
