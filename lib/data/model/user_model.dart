@@ -36,7 +36,7 @@ class User {
       introduction: json['introduction'] ?? '',
       imageUrl: json['imageUrl'] ?? '',
       location: json['location'] as GeoPoint? ?? GeoPoint(0, 0),
-      address: json['address'],
+      address: json['address'] ?? '',
     );
   }
 

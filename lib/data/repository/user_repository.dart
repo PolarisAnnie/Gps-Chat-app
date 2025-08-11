@@ -129,4 +129,11 @@ class UserRepository {
       print('로그아웃 실패: $e');
     }
   }
+
+  Future checkNicknameExistsExcludingCurrentUser(
+    String nickname,
+    String userId,
+  ) async {}
+
+  Future updateUser(User updatedUser) async {}
 }

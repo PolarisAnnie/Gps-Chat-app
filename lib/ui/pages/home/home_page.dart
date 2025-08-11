@@ -5,9 +5,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:gps_chat_app/core/utils/location_utils.dart'; // 위치 유틸
-import 'api.dart'; // 네이버 API 서비스
+import 'package:gps_chat_app/core/utils/location_utils.dart';
+import 'api.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide User;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,6 +26,7 @@ class _HomePageState extends State<HomePage> {
   bool hasLocation = true;
   bool _hasFetchedData = false;
   bool navigateToEmptyPage = false;
+  String loginUserAddress = '';
 
   @override
   void initState() {
@@ -53,14 +55,64 @@ class _HomePageState extends State<HomePage> {
       double lat = position.latitude;
       double lng = position.longitude;
 
+      // 현재 위치 주소 갱신 및 지역 키워드 추출
+      final locationData = await LocationUtils.getCurrentLocationData();
+      if (locationData != null) {
+        if (currentAddress != locationData.address) {
+          setState(() {
+            currentAddress = locationData.address;
+            hasLocation = true;
+          });
+        }
+      } else {
+        if (hasLocation != false || currentAddress != '위치를 가져올 수 없습니다.') {
+          setState(() {
+            currentAddress = '위치를 가져올 수 없습니다.';
+            hasLocation = false;
+          });
+        }
+      }
+      final currentRegionKeyword = extractLocationKeyword(currentAddress);
+      print('현재 위치 주소: $currentAddress');
+      print('현재 위치 지역 키워드: $currentRegionKeyword');
+
+      // 로그인한 유저 데이터 가져오기 및 지역 키워드 추출 (디버그 출력 추가)
+      final currentUser = FirebaseAuth.instance.currentUser;
+      print('현재 로그인 유저: $currentUser');
+
+      if (currentUser != null) {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .get();
+
+        print('로그인 멤버 문서 존재 여부: ${userDoc.exists}');
+
+        if (userDoc.exists) {
+          final userData = userDoc.data();
+          print('로그인 멤버 데이터: $userData');
+
+          String userRegion = '';
+          if (userData != null && userData['address'] != null) {
+            userRegion = extractLocationKeyword(userData['address']);
+            setState(() {
+              loginUserAddress = userData['address'];
+            });
+            print('로그인 멤버 주소: $loginUserAddress');
+          }
+          print('로그인 멤버 주소: ${userData?['address']} -> 지역키워드: $userRegion');
+        }
+      }
+
       final querySnapshot = await FirebaseFirestore.instance
           .collection('users')
           .get();
       print('Firebase users docs count: ${querySnapshot.docs.length}');
 
       List<User> users = [];
-      // 예시: 같은 지역 판단 변수 (여기서는 지역이 다르면 빈 화면으로 이동)
-      bool hasSameRegion = false;
+      final String currentRegionKeywordForUsers = extractLocationKeyword(
+        currentAddress,
+      );
 
       for (var doc in querySnapshot.docs) {
         final data = doc.data();
@@ -77,17 +129,6 @@ class _HomePageState extends State<HomePage> {
 
         user.distance = Geolocator.distanceBetween(lat, lng, userLat, userLng);
         users.add(user);
-        // 실제 지역 비교 로직을 여기에 넣으세요.
-        // 임시로 하나라도 있으면 같은 지역이라고 가정
-        hasSameRegion = true;
-      }
-
-      // 지역이 다르면 빈 화면으로 이동
-      if (!hasSameRegion) {
-        setState(() {
-          navigateToEmptyPage = true;
-        });
-        return;
       }
 
       users.sort((a, b) => a.distance.compareTo(b.distance));
@@ -125,10 +166,11 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // 주소에서 지역명 키워드 추출 함수
+  // 주소에서 지역명 키워드 추출 함수 (시/군/구 단위까지 넓게 커버)
   String extractLocationKeyword(String address) {
     if (address.isEmpty) return '';
 
+    // 시/도/구 단위까지 포함
     List<String> regions = [
       '서울',
       '부산',
@@ -152,16 +194,26 @@ class _HomePageState extends State<HomePage> {
       '천안',
       '안산',
       '용인',
+      '완산구',
+      '덕진구',
+      '해운대구',
+      '수영구',
     ];
 
     List<String> parts = address.split(' ');
 
-    for (var part in parts) {
-      for (var region in regions) {
+    // 우선 시/도/구 단위로 매칭
+    for (var region in regions) {
+      for (var part in parts) {
         if (part.contains(region)) {
           return region;
         }
       }
+    }
+
+    // 시/군/구 단위가 없으면 첫 번째 단어에서 '시', '군', '구' 제거 후 반환
+    if (parts.isNotEmpty) {
+      return parts[0].replaceAll(RegExp(r'(시|군|구)$'), '');
     }
 
     return '';
@@ -214,7 +266,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  //현제 위치 아닐때 home_empty_page로이동
   @override
   Widget build(BuildContext context) {
     if (navigateToEmptyPage) {
@@ -277,7 +328,9 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Expanded(
                             child: Text(
-                              currentAddress,
+                              loginUserAddress.isNotEmpty
+                                  ? loginUserAddress
+                                  : currentAddress,
                               style: const TextStyle(
                                 fontFamily: 'Paperlogy',
                                 fontSize: 16,

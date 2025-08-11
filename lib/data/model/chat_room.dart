@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
 import 'package:gps_chat_app/data/model/user.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
+import 'package:intl/intl.dart';
 
 // 1대1 채팅방
 class ChatRoom {
