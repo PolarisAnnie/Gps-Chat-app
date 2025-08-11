@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:gps_chat_app/core/providers/models/location_state.dart';
+import 'package:gps_chat_app/core/providers/states/location_state.dart';
 import 'package:gps_chat_app/core/utils/location_utils.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
 import 'package:gps_chat_app/data/repository/naver_map_repository.dart';

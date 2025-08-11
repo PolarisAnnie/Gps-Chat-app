@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gps_chat_app/core/providers/models/auth_state.dart';
+import 'package:gps_chat_app/core/providers/states/auth_state.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 

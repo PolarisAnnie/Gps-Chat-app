@@ -66,6 +66,25 @@ class UserRepository {
     }
   }
 
+  Future<List<User>> getUsersByAddress(String address, String userId) async {
+    try {
+      final useraddress = await _firestore
+          .collection('users')
+          .where('address', isEqualTo: address)
+          .get();
+
+      final users = useraddress.docs
+          .map((doc) => User.fromJson(doc.data()))
+          .where((user) => user.userId != userId) // 현재 사용자 제외
+          .toList();
+
+      return users;
+    } catch (e) {
+      debugPrint('주소 기반 사용자 목록 조회 실패: $e');
+      return []; // 오류 발생 시 빈 리스트 반환
+    }
+  }
+
   Future<bool> updateUserLocation({
     required String userId,
     required GeoPoint location,

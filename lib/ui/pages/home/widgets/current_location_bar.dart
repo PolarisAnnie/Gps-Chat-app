@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gps_chat_app/core/theme/theme.dart';
 
 class CurrentLocationBar extends StatelessWidget {
   final String? location; // 위치 텍스트 (선택적)
@@ -20,8 +21,8 @@ class CurrentLocationBar extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'Paperlogy',
               fontSize: 16,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
+              // fontWeight: FontWeight.w900,
+              color: AppTheme.textOnPrimary,
               shadows: [
                 Shadow(
                   offset: Offset(0, 0),
@@ -41,8 +42,8 @@ class CurrentLocationBar extends StatelessWidget {
                     style: const TextStyle(
                       fontFamily: 'Paperlogy',
                       fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      // fontWeight: FontWeight.w700,
+                      color: AppTheme.textOnPrimary,
                       shadows: [
                         Shadow(
                           offset: Offset(0, 0),
