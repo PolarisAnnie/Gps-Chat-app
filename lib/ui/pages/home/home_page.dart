@@ -24,6 +24,7 @@ class _HomePageState extends State<HomePage> {
   bool isLoadingFriends = true;
   bool hasLocation = true;
   bool _hasFetchedData = false;
+  bool navigateToEmptyPage = false;
 
   @override
   void initState() {
@@ -58,6 +59,8 @@ class _HomePageState extends State<HomePage> {
       print('Firebase users docs count: ${querySnapshot.docs.length}');
 
       List<User> users = [];
+      // 예시: 같은 지역 판단 변수 (여기서는 지역이 다르면 빈 화면으로 이동)
+      bool hasSameRegion = false;
 
       for (var doc in querySnapshot.docs) {
         final data = doc.data();
@@ -67,16 +70,24 @@ class _HomePageState extends State<HomePage> {
         double userLat = geoPoint?.latitude ?? 0.0;
         double userLng = geoPoint?.longitude ?? 0.0;
 
-        print('User ${user.nickname} 위치: $userLat, $userLng');
-
         if (userLat == 0.0 && userLng == 0.0) {
           print('경도, 위도 정보 없음. 스킵');
           continue;
         }
 
         user.distance = Geolocator.distanceBetween(lat, lng, userLat, userLng);
-
         users.add(user);
+        // 실제 지역 비교 로직을 여기에 넣으세요.
+        // 임시로 하나라도 있으면 같은 지역이라고 가정
+        hasSameRegion = true;
+      }
+
+      // 지역이 다르면 빈 화면으로 이동
+      if (!hasSameRegion) {
+        setState(() {
+          navigateToEmptyPage = true;
+        });
+        return;
       }
 
       users.sort((a, b) => a.distance.compareTo(b.distance));
@@ -159,6 +170,17 @@ class _HomePageState extends State<HomePage> {
   //현제 위치 아닐때 home_empty_page로이동
   @override
   Widget build(BuildContext context) {
+    if (navigateToEmptyPage) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home_empty_page');
+          setState(() {
+            navigateToEmptyPage = false;
+          });
+        }
+      });
+    }
+
     if (!hasLocation) {
       return Scaffold(
         body: Center(
@@ -227,10 +249,17 @@ class _HomePageState extends State<HomePage> {
                           ),
                           const SizedBox(width: 8),
                           Container(
-                            child: Image.asset(
-                              'assets/images/pin_white.png',
-                              width: 30,
-                              height: 30,
+                            child: IconButton(
+                              icon: Image.asset(
+                                'assets/images/pin_white.png',
+                                width: 30,
+                                height: 30,
+                              ),
+                              onPressed: () async {
+                                await fetchCurrentLocation();
+                                await fetchNearbyFriends();
+                                await fetchCafes();
+                              },
                             ),
                           ),
                         ],
@@ -457,6 +486,8 @@ class NaverApiService {
   final String clientId = 'o3Tj7WLieNlEAvX9xRjl';
   final String clientSecret = 'D47zCqbJxO';
 
+  final Map<String, List<dynamic>> _imageCache = {};
+
   Future<List<dynamic>> searchLocal(
     String query, {
     int display = 10,
@@ -487,6 +518,10 @@ class NaverApiService {
   }
 
   Future<List<dynamic>> searchImage(String query, {int display = 1}) async {
+    if (_imageCache.containsKey(query)) {
+      return _imageCache[query]!;
+    }
+
     final url = Uri.parse(
       '$_imageUrl?query=${Uri.encodeQueryComponent(query)}&display=$display',
     );
@@ -501,7 +536,9 @@ class NaverApiService {
 
     if (response.statusCode == 200) {
       final jsonBody = json.decode(response.body);
-      return jsonBody['items'] as List<dynamic>;
+      final items = jsonBody['items'] as List<dynamic>;
+      _imageCache[query] = items;
+      return items;
     } else {
       print('Image API 호출 실패: ${response.body}');
       return [];

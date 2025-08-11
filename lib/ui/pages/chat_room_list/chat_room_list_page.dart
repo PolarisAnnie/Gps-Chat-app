@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
 import 'package:gps_chat_app/data/model/chat_room.dart';
@@ -79,6 +80,15 @@ List<ChatRoom> _getSampleChatRooms() {
         createdAt: DateTime.now(),
         isSent: true,
       ),
+      otherUser: User(
+        userId: '1',
+        nickname: '상대1',
+        introduction: '',
+        imageUrl: '',
+        location: GeoPoint(0, 0),
+        address: '',
+      ),
+      messages: [],
     ),
     ChatRoom(
       roomId: 2,
@@ -91,6 +101,15 @@ List<ChatRoom> _getSampleChatRooms() {
         createdAt: DateTime.now(),
         isSent: false,
       ),
+      otherUser: User(
+        userId: '2',
+        nickname: '상대2',
+        introduction: '',
+        imageUrl: '',
+        location: GeoPoint(0, 0),
+        address: '',
+      ),
+      messages: [],
     ),
   ];
 }

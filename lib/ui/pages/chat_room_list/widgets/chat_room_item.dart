@@ -32,7 +32,7 @@ class ChatRoomItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'User ${chatRoom.otherUserId}', //TODO : id 통해서 닉네임 가져오기
+              'User ${chatRoom.otherUser}', //TODO : id 통해서 닉네임 가져오기
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 1),
