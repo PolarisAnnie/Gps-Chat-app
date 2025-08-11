@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gps_chat_app/data/repository/naver_map_repository.dart';
 
@@ -34,7 +35,10 @@ class LocationUtils {
 
       // 2. 현재 위치(좌표) 가져오기
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 10,
+        ),
       );
 
       // 3. Repository를 통해 좌표를 주소로 변환
@@ -45,7 +49,7 @@ class LocationUtils {
       // 4. 위치 데이터와 변환된 주소를 LocationData 객체로 반환
       return LocationData(position: position, address: address);
     } catch (e) {
-      print('위치 정보를 가져오는 데 실패했습니다: $e');
+      debugPrint('위치 정보를 가져오는 데 실패했습니다: $e');
       return null; // 오류 발생 시 null 반환
     }
   }

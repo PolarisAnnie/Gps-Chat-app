@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -61,11 +62,11 @@ class NaverMapService {
           return '주소를 찾을 수 없습니다.';
         }
       } else {
-        print('네이버 API 에러: ${response.body}');
+        debugPrint('네이버 API 에러: ${response.body}');
         return '주소 변환에 실패했습니다.';
       }
     } catch (e) {
-      print('네트워크 에러: $e');
+      debugPrint('네트워크 에러: $e');
       return '네트워크 연결을 확인해주세요.';
     }
   }
