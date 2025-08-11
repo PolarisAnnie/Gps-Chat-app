@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:gps_chat_app/core/utils/location_utils.dart';
 // NaverApiService import
 
 class Home extends StatefulWidget {
@@ -13,11 +16,26 @@ class Home extends StatefulWidget {
 class _HomePageState extends State<Home> {
   List<dynamic> cafes = [];
   bool isLoading = true;
+  String currentAddress = '위치 불러오는 중...';
 
   @override
   void initState() {
     super.initState();
+    fetchCurrentLocation();
     fetchCafes();
+  }
+
+  Future<void> fetchCurrentLocation() async {
+    final locationData = await LocationUtils.getCurrentLocationData();
+    if (locationData != null) {
+      setState(() {
+        currentAddress = locationData.address;
+      });
+    } else {
+      setState(() {
+        currentAddress = '위치를 가져올 수 없습니다.';
+      });
+    }
   }
 
   Future<void> fetchCafes() async {
@@ -87,10 +105,10 @@ class _HomePageState extends State<Home> {
                     Expanded(
                       child: Row(
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              '서울시 마포구 서교동',
-                              style: TextStyle(
+                              currentAddress,
+                              style: const TextStyle(
                                 fontFamily: 'Paperlogy',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,

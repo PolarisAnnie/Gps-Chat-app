@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:gps_chat_app/data/model/user_model.dart';
+import 'package:gps_chat_app/ui/pages/home/member_detail.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-// NaverApiService import
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:gps_chat_app/core/utils/location_utils.dart'; // 위치 유틸
+import 'api.dart'; // 네이버 API 서비스
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,19 +19,118 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<dynamic> cafes = [];
   bool isLoading = true;
+  String currentAddress = '위치 불러오는 중...';
+  List<User> friends = [];
+  bool isLoadingFriends = true;
+  bool hasLocation = true;
+  bool _hasFetchedData = false;
 
   @override
   void initState() {
     super.initState();
-    fetchCafes();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!_hasFetchedData) {
+        await fetchCurrentLocation();
+        await fetchNearbyFriends();
+        await fetchCafes();
+        _hasFetchedData = true;
+      }
+    });
+  }
+
+  Future<void> fetchNearbyFriends() async {
+    print('fetchNearbyFriends 호출됨');
+    setState(() {
+      isLoadingFriends = true;
+    });
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      print('현재 위치: ${position.latitude}, ${position.longitude}');
+      double lat = position.latitude;
+      double lng = position.longitude;
+
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .get();
+      print('Firebase users docs count: ${querySnapshot.docs.length}');
+
+      List<User> users = [];
+
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data();
+        final user = User.fromJson(data);
+
+        final GeoPoint? geoPoint = data['location'] as GeoPoint?;
+        double userLat = geoPoint?.latitude ?? 0.0;
+        double userLng = geoPoint?.longitude ?? 0.0;
+
+        print('User ${user.nickname} 위치: $userLat, $userLng');
+
+        if (userLat == 0.0 && userLng == 0.0) {
+          print('경도, 위도 정보 없음. 스킵');
+          continue;
+        }
+
+        user.distance = Geolocator.distanceBetween(lat, lng, userLat, userLng);
+
+        users.add(user);
+      }
+
+      users.sort((a, b) => a.distance.compareTo(b.distance));
+
+      print('정렬 후 친구 수: ${users.length}');
+
+      setState(() {
+        friends = users.take(4).toList();
+        isLoadingFriends = false;
+      });
+    } catch (e) {
+      print('Error fetching nearby friends: $e');
+      setState(() {
+        isLoadingFriends = false;
+      });
+    }
+  }
+
+  Future<void> fetchCurrentLocation() async {
+    final locationData = await LocationUtils.getCurrentLocationData();
+    if (locationData != null) {
+      if (currentAddress != locationData.address) {
+        setState(() {
+          currentAddress = locationData.address;
+          hasLocation = true;
+        });
+      }
+    } else {
+      if (hasLocation != false || currentAddress != '위치를 가져올 수 없습니다.') {
+        setState(() {
+          currentAddress = '위치를 가져올 수 없습니다.';
+          hasLocation = false;
+        });
+      }
+    }
   }
 
   Future<void> fetchCafes() async {
     try {
-      final api = NaverApiService();
-      final results = await api.searchLocal('카페', display: 5);
+      // Get current position before creating the API service
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      double latitude = position.latitude;
+      double longitude = position.longitude;
 
-      // For each result, fetch image URL using image search
+      final api = NaverApiService();
+      final results = await api.searchLocal(
+        '카페',
+        display: 5,
+        latitude: latitude,
+        longitude: longitude,
+      );
+
       for (var cafe in results) {
         final title = cafe['title'] ?? '';
         final images = await api.searchImage(
@@ -33,7 +138,7 @@ class _HomePageState extends State<HomePage> {
         );
 
         if (images.isNotEmpty) {
-          cafe['image'] = images.first['link']; // Use first image link
+          cafe['image'] = images.first['link'];
         } else {
           cafe['image'] = null;
         }
@@ -51,12 +156,25 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  //현제 위치 아닐때 home_empty_page로이동
   @override
   Widget build(BuildContext context) {
+    if (!hasLocation) {
+      return Scaffold(
+        body: Center(
+          child: Text(
+            '현재 위치를 가져올 수 없습니다.\n위치 권한을 확인해주세요.',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.zero, // 기본 여백 제거
+          padding: EdgeInsets.zero,
           children: [
             Align(
               alignment: Alignment.topCenter,
@@ -88,10 +206,10 @@ class _HomePageState extends State<HomePage> {
                     Expanded(
                       child: Row(
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              '서울시 마포구 서교동',
-                              style: TextStyle(
+                              currentAddress,
+                              style: const TextStyle(
                                 fontFamily: 'Paperlogy',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -124,7 +242,6 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 10),
 
-            // 지금 바로 연결 가능한, 텍스트
             Container(
               width: 375,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -162,77 +279,89 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 16),
 
-            // 연결 가능한 친구 리스트
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ListView.separated(
-                physics:
-                    const NeverScrollableScrollPhysics(), // 바깥 ListView 스크롤과 충돌 방지
-                shrinkWrap: true,
-                itemCount: 4,
-                separatorBuilder: (context, index) => Container(
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  width: double.infinity,
-                  height: 1,
-                  color: Colors.grey,
-                ),
-                itemBuilder: (context, index) {
-                  return Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: const BoxDecoration(
-                          color: Colors.grey,
-                          shape: BoxShape.circle,
-                        ),
+              child: isLoadingFriends
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.separated(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: friends.length,
+                      separatorBuilder: (context, index) => Container(
+                        margin: const EdgeInsets.symmetric(vertical: 12),
+                        width: double.infinity,
+                        height: 1,
+                        color: Colors.grey,
                       ),
-                      const SizedBox(width: 18),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            '영호느님',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                      itemBuilder: (context, index) {
+                        final user = friends[index];
+                        return Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        MemberDetailPage(user: user),
+                                  ),
+                                );
+                              },
+                              child: CircleAvatar(
+                                radius: 24,
+                                backgroundImage: user.imageUrl.isNotEmpty
+                                    ? NetworkImage(user.imageUrl)
+                                    : AssetImage(
+                                            'assets/images/default_profile.png',
+                                          )
+                                          as ImageProvider,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'flutter 앱 차업 준비중입니다!',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black54,
+                            const SizedBox(width: 18),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.nickname,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  user.introduction,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF3266FF),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Image.asset(
-                            'assets/images/chat_white.png',
-                            width: 24,
-                            height: 24,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
+                            const Spacer(),
+                            Container(
+                              width: 32,
+                              height: 32,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFF3266FF),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Center(
+                                child: Image.asset(
+                                  'assets/images/chat_white.png',
+                                  width: 24,
+                                  height: 24,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
             ),
             const SizedBox(height: 40),
 
-            // '코딩하기 좋은 카페 추천' 텍스트
             Container(
               width: 375,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -247,7 +376,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             const SizedBox(height: 16),
-            // 카페 추천 가로 스크롤 리스트 (API 데이터 기반)
+
             SizedBox(
               height: 300,
               child: isLoading
@@ -328,10 +457,18 @@ class NaverApiService {
   final String clientId = 'o3Tj7WLieNlEAvX9xRjl';
   final String clientSecret = 'D47zCqbJxO';
 
-  Future<List<dynamic>> searchLocal(String query, {int display = 10}) async {
-    final url = Uri.parse(
-      '$_localUrl?query=${Uri.encodeQueryComponent(query)}&display=$display',
-    );
+  Future<List<dynamic>> searchLocal(
+    String query, {
+    int display = 10,
+    double? latitude,
+    double? longitude,
+  }) async {
+    String urlString =
+        '$_localUrl?query=${Uri.encodeQueryComponent(query)}&display=$display';
+    if (latitude != null && longitude != null) {
+      urlString += '&coordinate=${longitude},${latitude}';
+    }
+    final url = Uri.parse(urlString);
 
     final response = await http.get(
       url,

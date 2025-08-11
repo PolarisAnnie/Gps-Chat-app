@@ -31,6 +31,7 @@ dependencies:
   flutter:
     sdk: flutter 
   flutter_dotenv: ^5.0.2
+  
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -38,6 +39,7 @@ dependencies:
   firebase_core: ^4.0.0
   firebase_auth: ^6.0.0
   cloud_firestore: ^6.0.0
+  firebase_storage: ^13.0.0
   geolocator: ^14.0.2
   geocoding: ^4.0.0 # 소린 추가: 좌표를 주소로 변환하기 위함
   permission_handler: ^12.0.1
@@ -45,10 +47,15 @@ dependencies:
   flutter_native_splash: ^2.4.6
   http: ^1.5.0
   intl: ^0.20.2
+  dio: ^5.1.0
+  flutter_riverpod: ^2.6.1
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: ^2.4.14 # 특강 추가
+  riverpod_generator: ^2.6.1 # 특강 추가
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

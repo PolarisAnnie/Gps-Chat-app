@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gps_chat_app/data/model/user_model.dart';
 
 class MemberDetailPage extends StatefulWidget {
-  const MemberDetailPage({super.key});
+  final User user;
+  const MemberDetailPage({super.key, required this.user});
 
   @override
   State<MemberDetailPage> createState() => _MemberDetailPageState();
@@ -10,6 +12,8 @@ class MemberDetailPage extends StatefulWidget {
 class _MemberDetailPageState extends State<MemberDetailPage> {
   @override
   Widget build(BuildContext context) {
+    final user = widget.user;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -33,51 +37,63 @@ class _MemberDetailPageState extends State<MemberDetailPage> {
               decoration: BoxDecoration(
                 color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(16),
+                image: user.imageUrl.isNotEmpty
+                    ? DecorationImage(
+                        image: NetworkImage(user.imageUrl),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
               ),
             ),
           ),
           const SizedBox(height: 23),
-          const Padding(
-            padding: EdgeInsets.only(left: 22.0),
+          Padding(
+            padding: const EdgeInsets.only(left: 22.0),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '소린쨩',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                user.nickname,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
           const SizedBox(height: 20),
-          const Align(
+          Align(
             alignment: Alignment.centerLeft,
             child: Padding(
-              padding: EdgeInsets.only(left: 22.0),
+              padding: const EdgeInsets.only(left: 22.0),
               child: Text(
-                '한줄소개한줄소개한줄소개한줄소개한줄소개한줄소개\n'
-                '한줄소개한줄소개한줄소개한줄소개한줄소개한줄소개\n'
-                '한줄소개한줄소개한줄소개한줄소새한줄소개한줄소개',
-                style: TextStyle(color: Colors.grey, fontSize: 14),
+                user.introduction.isNotEmpty ? user.introduction : '소개가 없습니다.',
+                style: const TextStyle(color: Colors.grey, fontSize: 14),
               ),
             ),
           ),
           const SizedBox(height: 20),
           Padding(
             padding: const EdgeInsets.only(left: 22.0),
-            child: Container(
-              width: 138,
-              height: 50,
-              decoration: BoxDecoration(
-                color: const Color(0xFF3266FF),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              padding: const EdgeInsets.only(left: 26.0),
-              alignment: Alignment.centerLeft,
-              child: const Text(
-                '채팅 시작하기',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+            child: GestureDetector(
+              onTap: () {
+                // TODO: Implement chat start logic here
+              },
+              child: Container(
+                width: 138,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF3266FF),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: const EdgeInsets.only(left: 26.0),
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  '채팅 시작하기',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
