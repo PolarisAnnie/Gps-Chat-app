@@ -4,14 +4,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class ChatMessage {
-  final int chatId; // 메시지아이디
-  final bool isSent; // 발신, 수신
-  final String content; // 내용
-  final DateTime createdAt; // 전송 시간
+  final String sender; // 발신자 이름
+  final String senderId; // 발신자 ID
+  final String address; // 채팅방이 생성된 위치
+  final String content; // 메시지 내용
+  final DateTime createdAt; // 생성 시간
 
   ChatMessage({
-    required this.chatId,
-    required this.isSent,
+    required this.sender,
+    required this.senderId,
+    required this.address,
     required this.content,
     required this.createdAt,
   });
@@ -19,8 +21,9 @@ class ChatMessage {
   // Firestore에서 불러올 때 사용
   ChatMessage.fromJson(Map<String, dynamic> map)
     : this(
-        chatId: map['chatId'],
-        isSent: map['isSent'],
+        sender: map['sender'],
+        senderId: map['senderId'],
+        address: map['address'],
         content: map['content'] ?? '',
         createdAt: (map['createdAt'] as Timestamp).toDate(),
       );
@@ -28,11 +31,17 @@ class ChatMessage {
   // Firestore로 저장할 때 사용
   Map<String, dynamic> toJson() {
     return {
-      'chatId': chatId,
-      'isSent': isSent,
+      'sender': sender,
+      'senderId': senderId,
+      'address': address,
       'content': content,
       'createdAt': Timestamp.fromDate(createdAt),
     };
+  }
+
+  // 현재 사용자 기준으로 발신/수신 판단
+  bool isSentByMe(String currentUserId) {
+    return senderId == currentUserId;
   }
 
   // 타임 포맷팅(ex. 2025-08-08 17:00)

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/core/theme/theme.dart';
 import 'package:gps_chat_app/core/providers/viewmodels/register_viewmodel.dart';
+import 'package:gps_chat_app/data/repository/user_repository.dart';
 
 class RegisterPage extends ConsumerStatefulWidget {
   final String nickname;
@@ -50,6 +51,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final newUser = await viewModel.registerUser();
 
     if (newUser != null && mounted) {
+      // 회원가입 성공 후 현재 사용자 설정
+      await UserRepository().setCurrentUserId(newUser.userId);
       Navigator.pushNamed(context, '/location', arguments: newUser);
     } else if (mounted) {
       final errorMessage = ref.read(registerViewModelProvider).errorMessage;

@@ -7,11 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart'; // riverpod import
 import 'package:gps_chat_app/core/theme/theme.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/firebase_options.dart';
+import 'package:gps_chat_app/ui/pages/chat_room_list/chat_room_list_page.dart';
 
 import 'package:gps_chat_app/ui/pages/main/main_navigation_page.dart';
 import 'package:gps_chat_app/ui/pages/auth/register_page.dart';
 import 'package:gps_chat_app/ui/pages/auth/signup_page.dart';
-import 'package:gps_chat_app/ui/pages/chat/chat_page.dart';
 import 'package:gps_chat_app/ui/pages/location_settings/location_settings.dart';
 import 'package:gps_chat_app/ui/pages/splash/splash_page.dart';
 
@@ -47,8 +47,8 @@ class MyApp extends StatelessWidget {
         '/location': (context) => LocationSettings(
           user: ModalRoute.of(context)!.settings.arguments as User,
         ),
-        '/main': (context) => const MainNavigationPage(), // 메인 네비게이션으로 변경
-        '/chat': (context) => ChatPage(), // 개별 채팅방용
+        '/main': (context) => MainNavigationPage(), // 메인 네비게이션으로 변경
+        '/chat': (context) => ChatRoomListPage(), // 개별 채팅방용
       },
     );
   }

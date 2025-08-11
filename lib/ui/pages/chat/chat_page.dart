@@ -1,69 +1,58 @@
 import 'package:flutter/material.dart';
-import 'package:gps_chat_app/data/model/chat_message.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gps_chat_app/ui/pages/chat/chat_view_model.dart';
 import 'package:gps_chat_app/ui/pages/chat/widgets/chat_bottom_sheet.dart';
 import 'package:gps_chat_app/ui/pages/chat/widgets/chat_recieve_item.dart';
 import 'package:gps_chat_app/ui/pages/chat/widgets/chat_send_item.dart';
 
-class ChatPage extends StatefulWidget {
+class ChatPage extends ConsumerStatefulWidget {
+  final String roomId;
+  ChatPage({required this.roomId});
+
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  ConsumerState<ChatPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> {
-  List<ChatMessage> messages = [];
-  void onSendMessage(String content) {
-    // 새 메시지 추가 함수
-    setState(() {
-      messages.add(
-        ChatMessage(
-          chatId: 2, //TODO: 자동 생성
-          content: content,
-          createdAt: DateTime.now(),
-          isSent: true, // TODO: 내가 보낸 메시지
-        ),
-      );
-    });
-  }
-
+class _ChatPageState extends ConsumerState<ChatPage> {
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(chatPageViewModelProvider(widget.roomId));
+    final viewModel = ref.read(
+      chatPageViewModelProvider(widget.roomId).notifier,
+    );
     return Scaffold(
       appBar: AppBar(title: Text('받는 사람 이름')),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: ListView(
-          //TODO: 하드코딩된 부분 수정 및 메시지 업로드 시 화면 업데이트 필요함
-          children: [
-            SizedBox(height: 10),
-            ChatSendItem(
-              imageUrl: '',
-              content: '안녕하세요안녕하세요안녕안녕안녕안녕안녕안녕안녕안녕안녕',
-              dateTime: DateTime.now(),
-            ),
-            SizedBox(height: 14),
-            ChatReceiveItem(
-              imageUrl: '',
-              content: '안녕하세요안녕하세요안녕안녕안녕안녕안녕안녕안녕안녕안녕',
-              dateTime: DateTime.now(),
-            ),
-            SizedBox(height: 10),
-            ChatReceiveItem(
-              imageUrl: '',
-              content: '반가워염',
-              dateTime: DateTime.now(),
-            ),
-            SizedBox(height: 14),
-            ChatSendItem(
-              imageUrl: '',
-              content: '안녕하세요안녕하세요안녕안녕안녕안녕안녕안녕안녕안녕안녕',
-              dateTime: DateTime.now(),
-            ),
-          ],
+        child: ListView.builder(
+          itemCount: state.messages.length,
+          itemBuilder: (context, index) {
+            final message = state.messages[index];
+            final isMyMessage = viewModel.isMyMessage(message);
+
+            return Column(
+              children: [
+                SizedBox(height: index == 0 ? 10 : 14),
+                isMyMessage
+                    ? ChatSendItem(
+                        imageUrl: '',
+                        content: message.content,
+                        dateTime: message.createdAt,
+                      )
+                    : ChatReceiveItem(
+                        imageUrl: '',
+                        content: message.content,
+                        dateTime: message.createdAt,
+                      ),
+                if (index == state.messages.length - 1) SizedBox(height: 10),
+              ],
+            );
+          },
         ),
       ),
       bottomSheet: ChatBottomSheet(
         MediaQuery.of(context).padding.bottom,
-        onSendMessage,
+        widget.roomId,
       ),
     );
   }
