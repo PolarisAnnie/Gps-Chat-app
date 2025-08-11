@@ -1,14 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:gps_chat_app/core/providers/models/location_state.dart';
 import 'package:gps_chat_app/core/utils/location_utils.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
+import 'package:gps_chat_app/data/repository/naver_map_repository.dart';
 
 class LocationViewModel extends StateNotifier<LocationState> {
   final UserRepository _userRepository;
+  final NaverMapRepository _naverMapRepository;
 
-  LocationViewModel(this._userRepository) : super(const LocationState());
+  LocationViewModel(this._userRepository, this._naverMapRepository) 
+      : super(const LocationState());
 
+  /// 현재 위치 정보를 가져와서 상태 업데이트
   Future<void> fetchLocation() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
@@ -38,6 +43,37 @@ class LocationViewModel extends StateNotifier<LocationState> {
     }
   }
 
+  /// 특정 좌표의 주소를 Repository를 통해 가져오기
+  Future<void> getAddressFromCoords(Position position) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      final address = await _naverMapRepository.getAddressFromPosition(position);
+      state = state.copyWith(
+        address: address,
+        currentPosition: position,
+        isButtonEnabled: true,
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: '주소 변환 중 오류가 발생했습니다.',
+      );
+    }
+  }
+
+  /// 위치 권한 확인
+  Future<bool> checkLocationPermission() async {
+    return await _naverMapRepository.checkLocationPermission();
+  }
+
+  /// 위치 권한 요청
+  Future<bool> requestLocationPermission() async {
+    return await _naverMapRepository.requestLocationPermission();
+  }
+
+  /// 사용자 위치 정보를 Firestore에 업데이트
   Future<bool> updateUserLocation(String userId) async {
     if (state.currentPosition == null) return false;
 
@@ -69,5 +105,8 @@ class LocationViewModel extends StateNotifier<LocationState> {
 
 final locationViewModelProvider =
     StateNotifierProvider<LocationViewModel, LocationState>((ref) {
-      return LocationViewModel(UserRepository());
+      return LocationViewModel(
+        UserRepository(), 
+        NaverMapRepository(),
+      );
     });

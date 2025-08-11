@@ -58,14 +58,14 @@ lib/
 │           ├── auth_viewmodel.dart
 │           ├── location_viewmodel.dart
 │           ├── register_viewmodel.dart
-│           ├── splash_viewmodel.dart
-│           └── naver_map_viewmodel.dart
+│           └── splash_viewmodel.dart
 ├── data/                          # 데이터 계층
 │   ├── model/                     # 데이터 모델
 │   │   └── user_model.dart
-│   └── repository/                # 데이터 저장소
+│   └── repository/                # 데이터 저장소 (Repository 패턴)
 │       ├── storage_repository.dart
-│       └── user_repository.dart
+│       ├── user_repository.dart
+│       └── naver_map_repository.dart   # 네이버 지도 API Repository
 └── ui/                           # UI 계층
     └── pages/                    # 화면별 페이지
         ├── splash/               # 스플래시 화면
@@ -92,9 +92,30 @@ lib/
 
 ---
 
-### 페이지별 MVVM 패턴 
+### MVVM + Repository 패턴 적용
 
-이 프로젝트는 기존 StatefulWidget 기반 코드를 **Riverpod + MVVM 패턴**으로 리팩토링했습니다.
+이 프로젝트는 **MVVM + Repository 패턴**을 기반으로 한 깔끔한 아키텍처를 구현했습니다.
+
+#### 🏗️ **아키텍처 계층 구조**
+```
+UI Layer (View) → ViewModel → Repository → Service → External API
+```
+
+#### 🔧 **핵심 컴포넌트**
+
+1. **Service Layer** (`core/services/`)
+   - 순수한 API 통신 담당
+   - `naver_map_service.dart`: 네이버 지도 API 직접 호출
+
+2. **Repository Layer** (`data/repository/`)
+   - Service와 ViewModel 사이의 데이터 추상화 계층
+   - 비즈니스 로직 처리 및 에러 핸들링
+   - `naver_map_repository.dart`: 위치 권한, 주소 변환 등 통합 관리
+
+3. **ViewModel Layer** (`core/providers/viewmodels/`)
+   - UI 상태 관리 및 비즈니스 로직
+   - Repository를 통한 데이터 처리
+   - `location_viewmodel.dart`: 위치 관련 모든 상태 관리
 
 #### 1. **Splash Screen** (`splash_page.dart`)
 - 앱 시작 시 애니메이션 화면
