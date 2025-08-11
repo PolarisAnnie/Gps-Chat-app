@@ -39,6 +39,7 @@ class _MemberListState extends State<MemberList> {
 
   @override
   Widget build(BuildContext context) {
+    // 현재 주소에 속한 멤버가 없을 경우
     if (members.isEmpty) {
       return Container(
         width: 375,
@@ -59,6 +60,8 @@ class _MemberListState extends State<MemberList> {
         ),
       );
     }
+
+    // 현재 주소에 속한 멤버가 있을 경우
     return SizedBox(
       height: 280, // 4개 항목 + 구분선들의 높이
       child: PageView.builder(
@@ -108,19 +111,24 @@ class _MemberListState extends State<MemberList> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF3266FF),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Image.asset(
-                            'assets/images/chat_white.png',
-                            width: 24,
-                            height: 24,
-                            fit: BoxFit.contain,
+                      GestureDetector(
+                        onTap: () {
+                          //TODO: 채팅방 생성 및 이동
+                        },
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF3266FF),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Image.asset(
+                              'assets/images/chat_white.png',
+                              width: 24,
+                              height: 24,
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                       ),
