@@ -35,7 +35,7 @@ final chatMessageRepositoryProvider = Provider<ChatMessageRepository>((ref) {
 });
 
 final currentUserProvider = FutureProvider<User?>((ref) async {
-  return await UserRepository().getCurrentUser(); // 🔧 인스턴스 생성 추가
+  return await UserRepository().getCurrentUser();
 });
 
 // 채팅 페이지 비즈니스 로직

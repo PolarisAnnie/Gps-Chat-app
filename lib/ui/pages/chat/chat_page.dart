@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gps_chat_app/data/model/user_model.dart';
+import 'package:gps_chat_app/data/repository/user_repository.dart';
 import 'package:gps_chat_app/ui/pages/chat/chat_view_model.dart';
 import 'package:gps_chat_app/ui/pages/chat/widgets/chat_bottom_sheet.dart';
 import 'package:gps_chat_app/ui/pages/chat/widgets/chat_recieve_item.dart';
 import 'package:gps_chat_app/ui/pages/chat/widgets/chat_send_item.dart';
 
+// 상대방 사용자 정보 조회 Provider
+final otherUserProvider = FutureProvider.family<User?, String>((
+  ref,
+  userId,
+) async {
+  return await UserRepository().getUserById(userId);
+});
+
 class ChatPage extends ConsumerStatefulWidget {
   final String roomId;
-  ChatPage({required this.roomId});
+  final String otherUserId;
+
+  ChatPage({required this.roomId, required this.otherUserId});
 
   @override
   ConsumerState<ChatPage> createState() => _ChatPageState();
@@ -15,13 +27,41 @@ class ChatPage extends ConsumerStatefulWidget {
 
 class _ChatPageState extends ConsumerState<ChatPage> {
   @override
+  void initState() {
+    super.initState();
+    // 실시간 메시지 스트림 시작
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(chatPageViewModelProvider(widget.roomId).notifier)
+          .startMessageStream();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final state = ref.watch(chatPageViewModelProvider(widget.roomId));
     final viewModel = ref.read(
       chatPageViewModelProvider(widget.roomId).notifier,
     );
+
+    // 상대방 사용자 정보 조회
+    final otherUserAsync = ref.watch(otherUserProvider(widget.otherUserId));
+    final otherUser = otherUserAsync.when(
+      data: (user) => user,
+      loading: () => null,
+      error: (_, __) => null,
+    );
+
+    // 현재 사용자 정보 조회
+    final currentUserAsync = ref.watch(currentUserProvider);
+    final currentUser = currentUserAsync.when(
+      data: (user) => user,
+      loading: () => null,
+      error: (_, __) => null,
+    );
+
     return Scaffold(
-      appBar: AppBar(title: Text('받는 사람 이름')),
+      appBar: AppBar(title: Text(otherUser?.nickname ?? '채팅')),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: ListView.builder(
@@ -35,14 +75,16 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 SizedBox(height: index == 0 ? 10 : 14),
                 isMyMessage
                     ? ChatSendItem(
-                        imageUrl: '',
+                        imageUrl: otherUser?.imageUrl ?? '', // null 안전 처리
+                        nickname: otherUser?.nickname ?? 'Unknown',
                         content: message.content,
-                        dateTime: message.createdAt,
+                        message: message,
                       )
                     : ChatReceiveItem(
-                        imageUrl: '',
+                        imageUrl: otherUser?.imageUrl ?? '', // null 안전 처리
+                        nickname: otherUser?.nickname ?? 'Unknown',
                         content: message.content,
-                        dateTime: message.createdAt,
+                        message: message,
                       ),
                 if (index == state.messages.length - 1) SizedBox(height: 10),
               ],

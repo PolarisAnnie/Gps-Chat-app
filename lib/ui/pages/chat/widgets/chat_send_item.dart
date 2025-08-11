@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:gps_chat_app/data/model/chat_message.dart';
 
 class ChatSendItem extends StatelessWidget {
   ChatSendItem({
     required this.imageUrl,
+    required this.nickname,
     required this.content,
-    required this.dateTime,
+    required this.message,
   });
 
   final String imageUrl;
+  final String nickname;
   final String content;
-  final DateTime dateTime;
+  final ChatMessage message;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +24,7 @@ class ChatSendItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '닉네임',
+                nickname,
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
               ),
               SizedBox(height: 3),
@@ -41,7 +44,7 @@ class ChatSendItem extends StatelessWidget {
               ),
               SizedBox(height: 3),
               Text(
-                dateTime.toIso8601String(),
+                message.formattedTime,
                 style: TextStyle(fontSize: 11, color: Colors.black45),
               ),
             ],
@@ -58,8 +61,7 @@ class ChatSendItem extends StatelessWidget {
             },
             child: ClipOval(
               child: Image.network(
-                //TODO : firebase 프로필 이미지 URL로 연결
-                'https://picsum.photos/320/320',
+                imageUrl.isEmpty ? 'https://picsum.photos/320/320' : imageUrl,
                 fit: BoxFit.cover,
               ),
             ),
