@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static const String _currentUserIdKey = 'current_user_id';
 
   Future<bool> addUser(User user) async {
     try {
@@ -81,42 +83,51 @@ class UserRepository {
     }
   }
 
-  // 프로필 페이지용: 사용자 정보 업데이트
-  Future<bool> updateUser(User user) async {
+  // 현재 로그인한 사용자의 전체 정보 가져오기
+  Future<User?> getCurrentUser() async {
     try {
-      await _firestore.collection('users').doc(user.userId).update({
-        'nickname': user.nickname,
-        'introduction': user.introduction,
-        'imageUrl': user.imageUrl,
-      });
-      return true;
+      final userId = await getCurrentUserId();
+      if (userId == null) return null;
+
+      return await getUserById(userId);
     } catch (e) {
-      debugPrint('사용자 정보 업데이트 실패: ${e.toString()}');
-      return false;
+      print('현재 사용자 정보 조회 실패: $e');
+      return null;
     }
   }
 
-  // 프로필 페이지용: 닉네임 중복 체크 (현재 사용자 제외)
-  Future<bool> checkNicknameExistsExcludingCurrentUser(
-    String nickname,
-    String currentUserId,
-  ) async {
+  // 로그인 시 사용자 ID를 기기에 저장
+  Future<void> setCurrentUserId(String userId) async {
     try {
-      final result = await _firestore
-          .collection('users')
-          .where('nickname', isEqualTo: nickname)
-          .get();
-
-      // 현재 사용자가 아닌 다른 사용자가 같은 닉네임을 사용하는지 확인
-      for (var doc in result.docs) {
-        if (doc.data()['userId'] != currentUserId) {
-          return true; // 다른 사용자가 같은 닉네임 사용 중
-        }
-      }
-      return false; // 중복 없음
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_currentUserIdKey, userId);
+      print('사용자 ID 저장 완료: $userId');
     } catch (e) {
-      debugPrint('닉네임 중복 체크 실패: ${e.toString()}');
-      return false;
+      print('사용자 ID 저장 실패: $e');
+    }
+  }
+
+  // 기기에 저장된 현재 사용자 ID 가져오기
+  Future<String?> getCurrentUserId() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getString(_currentUserIdKey);
+      print('저장된 사용자 ID: $userId');
+      return userId;
+    } catch (e) {
+      print('사용자 ID 조회 실패: $e');
+      return null;
+    }
+  }
+
+  // 로그아웃 (기기에 저장된 사용자 정보 삭제)
+  Future<void> logout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_currentUserIdKey);
+      print('로그아웃 완료');
+    } catch (e) {
+      print('로그아웃 실패: $e');
     }
   }
 }
