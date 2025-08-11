@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/core/providers/models/auth_state.dart';
+import 'package:gps_chat_app/data/repository/user_repository.dart';
 
 class AuthViewModel extends StateNotifier<AuthState> {
-  // 임시 닉네임 리스트 (실제로는 서버에서 가져와야 함)
-  final List<String> _nicknameList = ['user1', '기요미짱', '으니으니', '우형우형', '영호영호'];
+  final UserRepository _userRepository;
 
-  AuthViewModel() : super(const AuthState());
+  AuthViewModel(this._userRepository) : super(const AuthState());
 
   String? _validateNickname(String nickname) {
     if (nickname.isEmpty) {
@@ -17,8 +17,18 @@ class AuthViewModel extends StateNotifier<AuthState> {
     return null; // 유효한 경우 null 반환
   }
 
-  bool checkNicknameExists(String nickname) {
-    return _nicknameList.contains(nickname);
+  Future<bool> checkNicknameExists(String nickname) async {
+    return await _userRepository.checkNicknameExists(nickname);
+  }
+
+  /// 닉네임으로 유저 정보를 조회하고, 위치설정이 안된 유저인지 확인
+  Future<bool> isIncompleteUser(String nickname) async {
+    final user = await _userRepository.getUserByNickname(nickname);
+    if (user == null) return false;
+
+    // 위치가 (0, 0)이거나 address가 빈 문자열이면 위치설정이 안된 것으로 판단
+    return (user.location.latitude == 0 && user.location.longitude == 0) ||
+        (user.address?.isEmpty ?? true);
   }
 
   // 기존 setNickname, setError를 이 메서드로 통합
@@ -42,5 +52,5 @@ class AuthViewModel extends StateNotifier<AuthState> {
 final authViewModelProvider = StateNotifierProvider<AuthViewModel, AuthState>((
   ref,
 ) {
-  return AuthViewModel();
+  return AuthViewModel(UserRepository());
 });

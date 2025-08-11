@@ -32,7 +32,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
     ref.read(authViewModelProvider.notifier).updateNickname(inputText);
   }
 
-  void _onEnterPressed() {
+  void _onEnterPressed() async {
     final authState = ref.read(authViewModelProvider); // 현재 상태를 읽어옴
     final authNotifier = ref.read(authViewModelProvider.notifier);
     final nickname = authState.nickname;
@@ -41,53 +41,88 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
     // 닉네임 중복체크
     if (nickname != null) {
-      if (authNotifier.checkNicknameExists(nickname)) {
-        // 중복된 닉네임인 경우, 홈화면으로 이동
-        Navigator.pushReplacementNamed(
-          context,
-          '/main',
-          arguments: {'nickname': nickname},
-        );
-      } else {
-        // 중복되지 않은 닉네임인 경우, 프로필 설정 페이지로 이동
-        showCupertinoDialog(
-          context: context,
-          builder: (context) {
-            return CupertinoAlertDialog(
-              title: Text('첫 방문이시군요!'),
-              content: Text('\n회원가입하시겠습니까?'),
-              actions: [
-                CupertinoDialogAction(
-                  child: Text(
-                    '취소',
-                    style: TextStyle(color: Colors.red.shade400),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                CupertinoDialogAction(
-                  child: Text(
-                    '확인',
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
+      // 로딩 시작
+      authNotifier.setLoading(true);
+
+      try {
+        final nicknameExists = await authNotifier.checkNicknameExists(nickname);
+
+        if (nicknameExists) {
+          // 닉네임이 존재하는 경우, 위치설정이 안된 유저인지 확인
+          final isIncomplete = await authNotifier.isIncompleteUser(nickname);
+
+          if (isIncomplete) {
+            // 위치설정만 안한 유저인 경우, 바로 위치설정 페이지로 이동
+            if (mounted) {
+              Navigator.pushReplacementNamed(
+                context,
+                '/location',
+                arguments: nickname,
+              );
+            }
+          } else {
+            // 완전한 유저인 경우, 홈화면으로 이동
+            if (mounted) {
+              Navigator.pushReplacementNamed(
+                context,
+                '/main',
+                arguments: {'nickname': nickname},
+              );
+            }
+          }
+        } else {
+          // 닉네임이 존재하지 않는 경우, 회원가입 다이얼로그 표시
+          if (mounted) {
+            showCupertinoDialog(
+              context: context,
+              builder: (context) {
+                return CupertinoAlertDialog(
+                  title: Text('첫 방문이시군요!'),
+                  content: Text('\n회원가입하시겠습니까?'),
+                  actions: [
+                    CupertinoDialogAction(
+                      child: Text(
+                        '취소',
+                        style: TextStyle(color: Colors.red.shade400),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    // 회원가입 페이지로 이동
-                    Navigator.pushNamed(
-                      context,
-                      '/register',
-                      arguments: {'nickname': authState.nickname},
-                    );
-                  },
-                ),
-              ],
+                    CupertinoDialogAction(
+                      child: Text(
+                        '확인',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        // 회원가입 페이지로 이동
+                        Navigator.pushNamed(
+                          context,
+                          '/register',
+                          arguments: {'nickname': nickname},
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
             );
-          },
-        );
+          }
+        }
+      } catch (e) {
+        // 에러 발생 시 사용자에게 알림
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('네트워크 오류가 발생했습니다. 다시 시도해주세요.')),
+          );
+        }
+      } finally {
+        // 로딩 종료
+        authNotifier.setLoading(false);
       }
     }
   }
@@ -183,7 +218,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
 
                       // 입장하기 버튼
                       ElevatedButton(
-                        onPressed: authState.isNicknameValid
+                        onPressed:
+                            (authState.isNicknameValid && !authState.isLoading)
                             ? _onEnterPressed
                             : null,
                         style: ElevatedButton.styleFrom(
@@ -196,14 +232,22 @@ class _SignupPageState extends ConsumerState<SignupPage> {
                           disabledBackgroundColor: Colors.grey.shade600,
                           disabledForegroundColor: Colors.white,
                         ),
-
-                        child: const Text(
-                          '입장하기',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        child: authState.isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: AppTheme.textOnPrimary,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                '입장하기',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                       const SizedBox(height: 50),
                     ],
