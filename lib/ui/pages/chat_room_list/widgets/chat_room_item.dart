@@ -48,8 +48,7 @@ class ChatRoomItem extends StatelessWidget {
         ),
         Spacer(),
         Text(
-          //TODO : 현재 시간 대비 마지막 시간 차이 표현 함수 구현 필요
-          '10분 전',
+          chatRoom.relativeTime,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w400,
