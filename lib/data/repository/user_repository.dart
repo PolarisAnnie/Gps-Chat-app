@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart';
 
 class UserRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -12,7 +12,7 @@ class UserRepository {
       await _firestore.collection('users').doc(user.userId).set(user.toJson());
       return true; // 성공적으로 추가되면 true 반환
     } catch (e) {
-      debugPrint('사용자 추가 실패: $e');
+      debugPrint('사용자 추가 실패: ${e.toString()}');
       return false; // 오류 발생 시 false 반환
     }
   }
@@ -27,7 +27,7 @@ class UserRepository {
 
       return result.docs.isNotEmpty; // 닉네임이 존재하면 true, 아니면 false
     } catch (e) {
-      debugPrint('닉네임 중복 확인 실패: $e');
+      debugPrint('닉네임 중복 체크 실패: ${e.toString()}');
       return false; // 오류 발생 시 false 반환
     }
   }
@@ -50,7 +50,7 @@ class UserRepository {
       }
       return false; // 중복 없음
     } catch (e) {
-      debugPrint('닉네임 중복 체크 실패: $e');
+      debugPrint('닉네임 중복 체크 실패: ${e.toString()}');
       return false;
     }
   }
@@ -66,7 +66,7 @@ class UserRepository {
       }
       return null; // 유저가 존재하지 않으면 null 반환
     } catch (e) {
-      debugPrint('사용자 정보 가져오기 실패: $e');
+      debugPrint('사용자 정보 가져오기 실패: ${e.toString()}');
       return null; // 오류 발생 시 null 반환
     }
   }
@@ -84,7 +84,7 @@ class UserRepository {
       }
       return null; // 유저가 존재하지 않으면 null 반환
     } catch (e) {
-      debugPrint('닉네임으로 사용자 조회 실패: $e');
+      debugPrint('닉네임으로 사용자 조회 실패: ${e.toString()}');
       return null; // 오류 발생 시 null 반환
     }
   }
@@ -100,7 +100,7 @@ class UserRepository {
       });
       return true;
     } catch (e) {
-      debugPrint('사용자 정보 업데이트 실패: $e');
+      debugPrint('사용자 정보 업데이트 실패: ${e.toString()}');
       return false;
     }
   }
@@ -117,7 +117,7 @@ class UserRepository {
       });
       return true; // 성공적으로 업데이트되면 true 반환
     } catch (e) {
-      debugPrint('위치 정보 업데이트 실패: $e');
+      debugPrint('위치 정보 업데이트 실패: ${e.toString()}');
       return false; // 오류 발생 시 false 반환
     }
   }
@@ -130,7 +130,7 @@ class UserRepository {
 
       return await getUserById(userId);
     } catch (e) {
-      debugPrint('현재 사용자 정보 조회 실패: $e');
+      debugPrint('현재 사용자 정보 조회 실패: ${e.toString()}');
       return null;
     }
   }
@@ -142,7 +142,7 @@ class UserRepository {
       await prefs.setString(_currentUserIdKey, userId);
       debugPrint('사용자 ID 저장 완료: $userId');
     } catch (e) {
-      debugPrint('사용자 ID 저장 실패: $e');
+      debugPrint('사용자 ID 저장 실패: ${e.toString()}');
     }
   }
 
@@ -154,7 +154,7 @@ class UserRepository {
       debugPrint('저장된 사용자 ID: $userId');
       return userId;
     } catch (e) {
-      debugPrint('사용자 ID 조회 실패: $e');
+      debugPrint('사용자 ID 조회 실패: ${e.toString()}');
       return null;
     }
   }
@@ -166,7 +166,7 @@ class UserRepository {
       await prefs.remove(_currentUserIdKey);
       debugPrint('로그아웃 완료');
     } catch (e) {
-      debugPrint('로그아웃 실패: $e');
+      debugPrint('로그아웃 실패: ${e.toString()}');
     }
   }
 }

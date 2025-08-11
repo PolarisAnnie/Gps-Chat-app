@@ -235,7 +235,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                         foregroundColor: AppTheme.textOnPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30.0),
+                          borderRadius: BorderRadius.circular(10.0),
                         ),
                         disabledBackgroundColor: Colors.grey.shade600,
                         disabledForegroundColor: Colors.white,
