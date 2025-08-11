@@ -36,6 +36,13 @@ class ChatRoomItem extends ConsumerWidget {
           child: GestureDetector(
             onTap: () {
               print('프로필 이미지 클릭');
+              // TODO: MemberDetailPage 완성 후 네비게이션 연결
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => MemberDetailPage(userId: chatRoom.otherUserId),
+              //   ),
+              // );
             },
             child: ClipOval(
               child: Image.network(

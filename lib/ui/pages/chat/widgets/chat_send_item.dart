@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gps_chat_app/core/providers/viewmodels/main_navigation_viewmodel.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
 
-class ChatSendItem extends StatelessWidget {
+class ChatSendItem extends ConsumerWidget {
   ChatSendItem({
     required this.imageUrl,
     required this.nickname,
@@ -15,7 +17,7 @@ class ChatSendItem extends StatelessWidget {
   final ChatMessage message;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -51,13 +53,14 @@ class ChatSendItem extends StatelessWidget {
           ),
         ),
         SizedBox(width: 8),
-        Container(
+        SizedBox(
           height: 32,
           width: 32,
-          //decoration: BoxDecoration(shape: BoxShape.circle),
           child: GestureDetector(
             onTap: () {
               print('프로필 이미지 클릭');
+              // 내 프로필 탭으로 이동
+              ref.read(mainNavigationViewModelProvider.notifier).changeTab(2);
             },
             child: ClipOval(
               child: Image.network(
