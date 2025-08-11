@@ -1,13 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/data/model/chat_room.dart';
+import 'package:gps_chat_app/data/model/user_model.dart';
+import 'package:gps_chat_app/data/repository/user_repository.dart';
 
-class ChatRoomItem extends StatelessWidget {
+// otherUserId로 사용자 정보 조회
+final otherUserProvider = FutureProvider.family<User?, String>((
+  ref,
+  userId,
+) async {
+  return await UserRepository().getUserById(userId);
+});
+
+class ChatRoomItem extends ConsumerWidget {
   const ChatRoomItem({super.key, required this.chatRoom});
 
   final ChatRoom chatRoom;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 상대방 사용자 정보 조회
+    final otherUserAsync = ref.watch(otherUserProvider(chatRoom.otherUserId));
+    final otherUser = otherUserAsync.when(
+      data: (user) => user,
+      loading: () => null,
+      error: (_, __) => null,
+    );
+
     return Row(
       children: [
         Container(
@@ -20,8 +39,8 @@ class ChatRoomItem extends StatelessWidget {
             },
             child: ClipOval(
               child: Image.network(
-                //TODO : firebase 프로필 이미지 URL로 연결
-                'https://picsum.photos/480/480',
+                otherUser?.imageUrl ??
+                    'https://picsum.photos/480/480', // 실제 프로필 이미지
                 fit: BoxFit.cover,
               ),
             ),
@@ -32,7 +51,7 @@ class ChatRoomItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'User ${chatRoom.otherUser}', //TODO : id 통해서 닉네임 가져오기
+              otherUser?.nickname ?? 'User ${chatRoom.otherUserId}', // 실제 닉네임
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 1),
@@ -48,8 +67,7 @@ class ChatRoomItem extends StatelessWidget {
         ),
         Spacer(),
         Text(
-          //TODO : 현재 시간 대비 마지막 시간 차이 표현 함수 구현 필요
-          '10분 전',
+          chatRoom.relativeTime,
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w400,
