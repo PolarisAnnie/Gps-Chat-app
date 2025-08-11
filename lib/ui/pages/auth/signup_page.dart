@@ -1,20 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gps_chat_app/core/providers/viewmodels/auth_viewmodel.dart';
 
-class SignupPage extends StatefulWidget {
+class SignupPage extends ConsumerStatefulWidget {
   const SignupPage({super.key});
 
   @override
-  State<StatefulWidget> createState() => _SignupPageState();
+  ConsumerState<SignupPage> createState() => _SignupPageState();
 }
 
-class _SignupPageState extends State<SignupPage> {
+class _SignupPageState extends ConsumerState<SignupPage> {
   final TextEditingController _nicknameController = TextEditingController();
-  String? _errorText;
-  bool _isFilled = false;
-
-  // 여기서 서버랑 통신해서 닉네임 목록 관리하기!! 지금은 임시 리스트
-  final List<String> _nicknameList = ['user1', '기요미짱', '으니으니', '우형우형', '영호영호'];
 
   @override
   void initState() {
@@ -31,27 +28,25 @@ class _SignupPageState extends State<SignupPage> {
 
   void _validateNickname() {
     final inputText = _nicknameController.text;
-    setState(() {
-      if (inputText.length < 4) {
-        _errorText = '닉네임은 4글자 이상이어야 합니다.';
-        _isFilled = false;
-      } else {
-        _errorText = null;
-        _isFilled = true;
-      }
-    });
+    final authViewModel = ref.read(authViewModelProvider.notifier);
+
+    authViewModel.setNickname(inputText);
+    final error = authViewModel.validateNickname(inputText);
+    authViewModel.setError(error);
   }
 
   void _onEnterPressed() {
     final inputText = _nicknameController.text;
-    if (!_isFilled) return; // 닉네임이 유효하지 않으면 종료
+    final authViewModel = ref.read(authViewModelProvider.notifier);
+
+    if (!authViewModel.isNicknameValid) return; // 닉네임이 유효하지 않으면 종료
 
     // 닉네임 중복체크
-    if (_nicknameList.contains(inputText)) {
+    if (authViewModel.checkNicknameExists(inputText)) {
       // 중복된 닉네임인 경우, 홈화면으로 이동
       Navigator.pushReplacementNamed(
         context,
-        '/home',
+        '/main',
         arguments: {'nickname': inputText},
       );
     } else {
@@ -166,7 +161,9 @@ class _SignupPageState extends State<SignupPage> {
                             vertical: 16.0,
                             horizontal: 0.0,
                           ),
-                          errorText: _errorText,
+                          errorText: ref
+                              .watch(authViewModelProvider)
+                              .errorMessage,
                           errorStyle: TextStyle(
                             color: Colors.red,
                             fontSize: 12,
@@ -183,7 +180,12 @@ class _SignupPageState extends State<SignupPage> {
 
                       // 입장하기 버튼
                       ElevatedButton(
-                        onPressed: _isFilled ? _onEnterPressed : null,
+                        onPressed:
+                            ref
+                                .watch(authViewModelProvider.notifier)
+                                .isNicknameValid
+                            ? _onEnterPressed
+                            : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           foregroundColor: Colors.white,

@@ -1,96 +1,50 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/core/theme/theme.dart';
-import 'package:gps_chat_app/core/utils/location_utils.dart';
+import 'package:gps_chat_app/core/providers/viewmodels/location_viewmodel.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
-import 'package:gps_chat_app/data/repository/user_repository.dart';
 
-class LocationSettings extends StatefulWidget {
+class LocationSettings extends ConsumerStatefulWidget {
   final User user;
 
   const LocationSettings({super.key, required this.user});
 
   @override
-  State<LocationSettings> createState() => _LocationSettingsState();
+  ConsumerState<LocationSettings> createState() => _LocationSettingsState();
 }
 
-class _LocationSettingsState extends State<LocationSettings> {
-  final UserRepository _userRepository = UserRepository();
-
-  String _locationAddress = '위치 정보를 가져와주세요.';
-  Position? _currentPosition;
-  bool _isButtonEnabled = false;
-  bool _isLoading = false;
-
+class _LocationSettingsState extends ConsumerState<LocationSettings> {
   // Location utils로 현재 위치 가져오는 메서드
   Future<void> _fetchLocation() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    final locationData = await LocationUtils.getCurrentLocationData();
-
-    setState(() {
-      if (locationData != null) {
-        // 위치 정보가 유효한 경우
-        _locationAddress = locationData.address;
-        _currentPosition = locationData.position;
-        _isButtonEnabled = true; // 위치 정보가 유효하면 버튼 활성화
-      } else {
-        _locationAddress = '위치를 가져올 수 없습니다. 권한을 확인해주세요.';
-        _isButtonEnabled = false;
-      }
-      _isLoading = false;
-    });
+    await ref.read(locationViewModelProvider.notifier).fetchLocation();
   }
 
   // _onStartButtonPressed 메서드 (정보를 업데이트하도록 변경)
   void _onStartButtonPressed() async {
-    if (!_isButtonEnabled || _isLoading || _currentPosition == null) return;
+    final viewModel = ref.read(locationViewModelProvider.notifier);
+    final isSuccess = await viewModel.updateUserLocation(widget.user.userId);
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // 1. 새로운 위치 정보 생성
-      final newLocation = GeoPoint(
-        _currentPosition!.latitude,
-        _currentPosition!.longitude,
-      );
-
-      // 2. UserRepository를 사용하여 Firestore에 사용자 정보 업데이트
-      final bool isSuccess = await _userRepository.updateUserLocation(
-        userId: widget.user.userId,
-        location: newLocation,
-        address: _locationAddress,
-      );
-
-      if (isSuccess) {
-        // 3. 성공적으로 업데이트되면 홈 화면으로 이동
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/home',
-          (route) => false, // 모든 이전 화면 제거
-        );
-      } else {
-        throw Exception('위치 정보 업데이트에 실패했습니다.');
-      }
-    } catch (e) {
-      print('위치 정보 업데이트 중 오류 발생: $e');
-      ScaffoldMessenger.of(
+    if (isSuccess && mounted) {
+      // 성공적으로 업데이트되면 홈 화면으로 이동
+      Navigator.pushNamedAndRemoveUntil(
         context,
-      ).showSnackBar(SnackBar(content: Text('위치 정보 업데이트 중 오류가 발생했습니다.')));
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+        '/main',
+        (route) => false, // 모든 이전 화면 제거
+      );
+    } else if (mounted) {
+      final state = ref.read(locationViewModelProvider);
+      if (state.errorMessage != null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(state.errorMessage!)));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(locationViewModelProvider);
+
     return Scaffold(
       appBar: AppBar(title: Text('위치 설정'), centerTitle: true),
       body: SafeArea(
@@ -149,15 +103,15 @@ class _LocationSettingsState extends State<LocationSettings> {
                         ),
                       ),
                     ),
-                    child: _isLoading
+                    child: state.isLoading
                         ? Center(child: CircularProgressIndicator())
                         : Row(
                             children: [
                               Text(
-                                _locationAddress,
+                                state.address,
                                 style: TextStyle(
                                   fontSize: 18,
-                                  color: _isButtonEnabled
+                                  color: state.isButtonEnabled
                                       ? AppTheme.textPrimary
                                       : AppTheme.textTertiary,
                                 ),
@@ -171,7 +125,9 @@ class _LocationSettingsState extends State<LocationSettings> {
                                   color: AppTheme.primaryColor,
                                   size: 30,
                                 ),
-                                onPressed: _isLoading ? null : _fetchLocation,
+                                onPressed: state.isLoading
+                                    ? null
+                                    : _fetchLocation,
                               ),
                             ],
                           ),
@@ -184,7 +140,7 @@ class _LocationSettingsState extends State<LocationSettings> {
               Spacer(),
               //시작하기 버튼
               ElevatedButton(
-                onPressed: _isButtonEnabled && !_isLoading
+                onPressed: state.isButtonEnabled && !state.isLoading
                     ? _onStartButtonPressed
                     : null,
                 style: ElevatedButton.styleFrom(
@@ -196,7 +152,7 @@ class _LocationSettingsState extends State<LocationSettings> {
                   ),
                   disabledBackgroundColor: Colors.grey.shade600,
                 ),
-                child: _isLoading
+                child: state.isLoading
                     ? SizedBox(
                         height: 20,
                         width: 20,

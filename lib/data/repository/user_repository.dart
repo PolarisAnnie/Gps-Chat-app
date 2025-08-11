@@ -29,18 +29,21 @@ class UserRepository {
     }
   }
 
-  // Future<User?> getUserById(String userId) async {
-  //   try {
-  //     final docSnapshot = await _firestore.collection('users').doc(userId).get();
-  //     if (docSnapshot.exists) {
-  //       return User.fromJson(docSnapshot.data()!);
-  //     }
-  //     return null; // 유저가 존재하지 않으면 null 반환
-  //   } catch (e) {
-  //     debugPrint(e);
-  //     return null; // 오류 발생 시 null 반환
-  //   }
-  // }
+  Future<User?> getUserById(String userId) async {
+    try {
+      final docSnapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .get();
+      if (docSnapshot.exists) {
+        return User.fromJson(docSnapshot.data()!);
+      }
+      return null; // 유저가 존재하지 않으면 null 반환
+    } catch (e) {
+      print('사용자 정보 가져오기 실패: $e');
+      return null; // 오류 발생 시 null 반환
+    }
+  }
 
   Future<User?> getUserByNickname(String nickname) async {
     try {
@@ -74,6 +77,45 @@ class UserRepository {
     } catch (e) {
       print('위치 정보 업데이트 실패: $e');
       return false; // 오류 발생 시 false 반환
+    }
+  }
+
+  // 프로필 페이지용: 사용자 정보 업데이트
+  Future<bool> updateUser(User user) async {
+    try {
+      await _firestore.collection('users').doc(user.userId).update({
+        'nickname': user.nickname,
+        'introduction': user.introduction,
+        'imageUrl': user.imageUrl,
+      });
+      return true;
+    } catch (e) {
+      print('사용자 정보 업데이트 실패: $e');
+      return false;
+    }
+  }
+
+  // 프로필 페이지용: 닉네임 중복 체크 (현재 사용자 제외)
+  Future<bool> checkNicknameExistsExcludingCurrentUser(
+    String nickname,
+    String currentUserId,
+  ) async {
+    try {
+      final result = await _firestore
+          .collection('users')
+          .where('nickname', isEqualTo: nickname)
+          .get();
+
+      // 현재 사용자가 아닌 다른 사용자가 같은 닉네임을 사용하는지 확인
+      for (var doc in result.docs) {
+        if (doc.data()['userId'] != currentUserId) {
+          return true; // 다른 사용자가 같은 닉네임 사용 중
+        }
+      }
+      return false; // 중복 없음
+    } catch (e) {
+      print('닉네임 중복 체크 실패: $e');
+      return false;
     }
   }
 }
