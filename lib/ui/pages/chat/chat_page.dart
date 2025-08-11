@@ -7,7 +7,7 @@ import 'package:gps_chat_app/ui/pages/chat/widgets/chat_send_item.dart';
 
 class ChatPage extends ConsumerStatefulWidget {
   final String roomId;
-  ChatPage({required this.roomId});
+  const ChatPage({super.key, required this.roomId});
 
   @override
   ConsumerState<ChatPage> createState() => _ChatPageState();

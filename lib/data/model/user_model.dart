@@ -40,7 +40,7 @@ class User {
     );
   }
 
-  get id => null;
+  Null get id => null;
 
   // Firestore로 저장할 때 사용
   Map<String, dynamic> toJson() {

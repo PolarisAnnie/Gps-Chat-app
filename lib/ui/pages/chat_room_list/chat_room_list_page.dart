@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/ui/pages/chat/chat_page.dart';
@@ -6,6 +5,8 @@ import 'package:gps_chat_app/ui/pages/chat_room_list/chat_room_list_view_model.d
 import 'package:gps_chat_app/ui/pages/chat_room_list/widgets/chat_room_item.dart';
 
 class ChatRoomListPage extends ConsumerWidget {
+  const ChatRoomListPage({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(chatRoomListViewModelProvider);

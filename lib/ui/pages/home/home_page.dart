@@ -4,9 +4,7 @@ import 'package:gps_chat_app/ui/pages/home/member_detail.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:gps_chat_app/core/utils/location_utils.dart';
-import 'api.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 
@@ -597,7 +595,7 @@ class NaverApiService {
     String urlString =
         '$_localUrl?query=${Uri.encodeQueryComponent(query)}&display=$display';
     if (latitude != null && longitude != null) {
-      urlString += '&coordinate=${longitude},${latitude}';
+      urlString += '&coordinate=$longitude,$latitude';
     }
     final url = Uri.parse(urlString);
 
