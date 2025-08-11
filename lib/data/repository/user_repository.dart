@@ -91,7 +91,7 @@ class UserRepository {
 
       return await getUserById(userId);
     } catch (e) {
-      print('현재 사용자 정보 조회 실패: $e');
+      debugPrint('현재 사용자 정보 조회 실패: $e');
       return null;
     }
   }
@@ -101,9 +101,9 @@ class UserRepository {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_currentUserIdKey, userId);
-      print('사용자 ID 저장 완료: $userId');
+      debugPrint('사용자 ID 저장 완료: $userId');
     } catch (e) {
-      print('사용자 ID 저장 실패: $e');
+      debugPrint('사용자 ID 저장 실패: $e');
     }
   }
 
@@ -112,10 +112,10 @@ class UserRepository {
     try {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString(_currentUserIdKey);
-      print('저장된 사용자 ID: $userId');
+      debugPrint('저장된 사용자 ID: $userId');
       return userId;
     } catch (e) {
-      print('사용자 ID 조회 실패: $e');
+      debugPrint('사용자 ID 조회 실패: $e');
       return null;
     }
   }
@@ -125,9 +125,9 @@ class UserRepository {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_currentUserIdKey);
-      print('로그아웃 완료');
+      debugPrint('로그아웃 완료');
     } catch (e) {
-      print('로그아웃 실패: $e');
+      debugPrint('로그아웃 실패: $e');
     }
   }
 }
