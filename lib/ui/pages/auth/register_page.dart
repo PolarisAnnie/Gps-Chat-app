@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+import 'package:flutter/cupertino.dart';
+>>>>>>> dev
 =======
 import 'package:flutter/cupertino.dart';
 >>>>>>> dev
@@ -112,6 +116,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   Widget build(BuildContext context) {
     final state = ref.watch(registerViewModelProvider);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -265,6 +270,152 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           ),
                         ],
                       ),
+=======
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final shouldPop = await _onWillPop();
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          appBar: AppBar(title: const Text('회원가입'), centerTitle: true),
+          body: SafeArea(
+            child: Column(
+              children: [
+                // 프로필 이미지 선택
+                Container(
+                  color: AppTheme.primaryColor,
+                  height: 180,
+                  // padding: const EdgeInsets.all(32),
+                  child: Center(
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 56,
+                            backgroundColor: Color(0xFFdedede),
+                            backgroundImage: state.profileImage != null
+                                ? FileImage(state.profileImage!)
+                                : null,
+                            child: state.profileImage == null
+                                ? Icon(
+                                    Icons.person,
+                                    size: 56,
+                                    color: Color(0xFF535353),
+                                  )
+                                : null,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Color(0xFF98b2ff),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.camera_alt_outlined,
+                                size: 18,
+                                color: AppTheme.textOnPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: ListView(
+                      children: [
+                        // const SizedBox(height: 40),
+                        // 닉네임 입력
+                        TextField(
+                          controller: _nicknameController,
+                          decoration: InputDecoration(
+                            labelText: '닉네임',
+                            labelStyle: TextStyle(
+                              color: AppTheme.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                            hintText: '사용할 이름을 입력해주세요',
+                            hintStyle: TextStyle(color: AppTheme.textTertiary),
+                            border: const UnderlineInputBorder(),
+                            floatingLabelBehavior: FloatingLabelBehavior.always,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        const SizedBox(
+                          child: Text(
+                            '소개',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textPrimary,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        // 소개글 입력
+                        TextField(
+                          controller: _introController,
+                          decoration: InputDecoration(
+                            hintText: '가볍게 나에 대한 소개를 작성해주세요',
+                            hintStyle: TextStyle(color: AppTheme.textTertiary),
+                            border: const OutlineInputBorder(),
+                          ),
+                          maxLines: 5,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                // 다음 단계로 이동 버튼
+                Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: state.isFormValid && !state.isLoading
+                          ? _onNextPressed
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: AppTheme.textOnPrimary,
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                        ),
+                        disabledBackgroundColor: Colors.grey.shade600,
+                        disabledForegroundColor: Colors.white,
+                      ),
+                      child: state.isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: AppTheme.textOnPrimary,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              '다음 단계로',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+>>>>>>> dev
                     ),
                   ),
                 ),
