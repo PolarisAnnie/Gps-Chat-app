@@ -4,10 +4,11 @@ import 'package:intl/intl.dart';
 
 // 1대1 채팅방
 class ChatRoom {
-  final int roomId; // 채팅방 아이디
+  final String roomId; // 채팅방 아이디
   // User 객체 대신 ID만 저장 : User 정보는 별도로 조회 → Firebase에서 실시간으로 가져오기
-  final int currentUserId; // 현재 사용자 ID (나)
-  final int otherUserId; // 상대방 정보
+  final String currentUserId; // 현재 사용자 ID (나)
+  final String otherUserId; // 상대방 정보
+  final String address; // 채팅방 생성된 위치
   final DateTime createdAt; // 채팅방 생성 시간
   final ChatMessage? lastMessage; // 마지막 메시지
 
@@ -15,6 +16,7 @@ class ChatRoom {
     required this.roomId,
     required this.currentUserId,
     required this.otherUserId,
+    required this.address,
     required this.createdAt,
     this.lastMessage,
   });
@@ -25,6 +27,7 @@ class ChatRoom {
         roomId: map['roomId'],
         currentUserId: map['currentUserId'],
         otherUserId: map['otherUserId'],
+        address: map['address'],
         createdAt: (map['createdAt'] as Timestamp).toDate(),
         lastMessage: map['lastMessage'] != null
             ? ChatMessage.fromJson(map['lastMessage'])
@@ -37,6 +40,7 @@ class ChatRoom {
       'roomId': roomId,
       'currentUserId': currentUserId,
       'otherUserId': otherUserId,
+      'address': address,
       'createdAt': Timestamp.fromDate(createdAt),
       'lastMessage': lastMessage?.toJson(),
     };

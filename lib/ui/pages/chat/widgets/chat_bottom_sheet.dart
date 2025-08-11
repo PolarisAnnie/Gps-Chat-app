@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gps_chat_app/ui/pages/chat/chat_view_model.dart';
 
-class ChatBottomSheet extends StatefulWidget {
-  ChatBottomSheet(this.bottomPadding, this.onSend);
+class ChatBottomSheet extends ConsumerStatefulWidget {
+  ChatBottomSheet(this.bottomPadding, this.roomId);
 
   final double bottomPadding;
-  final Function(String) onSend;
+  final String roomId;
 
   @override
-  State<ChatBottomSheet> createState() => _ChatDetailBottomSheetState();
+  ConsumerState<ChatBottomSheet> createState() => _ChatDetailBottomSheetState();
 }
 
-class _ChatDetailBottomSheetState extends State<ChatBottomSheet> {
+class _ChatDetailBottomSheetState extends ConsumerState<ChatBottomSheet> {
   final controller = TextEditingController();
-  bool hasText = false;
 
   @override
   void initState() {
@@ -27,26 +28,28 @@ class _ChatDetailBottomSheetState extends State<ChatBottomSheet> {
     super.dispose();
   }
 
-  // 텍스트 변화 감지 함수
+  // 텍스트 변화 감지
   void onTextChanged() {
-    final bool newHasText = controller.text.trim().isNotEmpty;
-    if (newHasText != hasText) {
-      setState(() {
-        hasText = newHasText;
-      });
-    }
+    final viewModel = ref.read(
+      chatPageViewModelProvider(widget.roomId).notifier,
+    );
+    viewModel.onTextChanged(controller.text);
   }
 
+  // 메시지 전송
   void onSend() {
-    if (!hasText) return;
-    //TODO : 채팅 업로드 함수
-    print('채팅 업로드');
-    widget.onSend(controller.text);
+    final viewModel = ref.read(
+      chatPageViewModelProvider(widget.roomId).notifier,
+    );
+    viewModel.onSendPressed();
     controller.clear();
   }
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(chatPageViewModelProvider(widget.roomId));
+    final hasText = state.newMessageText.trim().isNotEmpty;
+
     return Container(
       height: 70 + widget.bottomPadding,
       color: Colors.white,
@@ -86,7 +89,7 @@ class _ChatDetailBottomSheetState extends State<ChatBottomSheet> {
                   ),
 
                   GestureDetector(
-                    onTap: hasText ? onSend : null,
+                    onTap: hasText && !state.isSending ? onSend : null,
                     child: Container(
                       width: 50,
                       height: 50,
