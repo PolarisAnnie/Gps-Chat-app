@@ -75,8 +75,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 SizedBox(height: index == 0 ? 10 : 14),
                 isMyMessage
                     ? ChatSendItem(
-                        imageUrl: otherUser?.imageUrl ?? '', // null 안전 처리
-                        nickname: otherUser?.nickname ?? 'Unknown',
+                        imageUrl: currentUser?.imageUrl ?? '', // null 안전 처리
+                        nickname: currentUser?.nickname ?? 'Me',
                         content: message.content,
                         message: message,
                       )
