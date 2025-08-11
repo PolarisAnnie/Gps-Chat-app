@@ -29,7 +29,7 @@ class NaverMapRepository {
     int radius = 1000,
   }) async {
     try {
-      // TODO: Naver Local Search API 연동 구현
+      // Naver Local Search API 연동
       // _naverMapService에 해당 기능 추가 후 호출
       return [];
     } catch (e) {
