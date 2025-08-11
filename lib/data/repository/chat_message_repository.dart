@@ -7,26 +7,14 @@ class ChatMessageRepository {
   // 메시지 전송(Create)
   Future<void> sendMessage({
     required String roomId,
-    required String content,
-    required bool isSent,
+    required ChatMessage message,
   }) async {
     try {
-      final messageDoc = firestore
+      await firestore
           .collection('chatrooms')
           .doc(roomId)
-          .collection('messages')
-          .doc();
-
-      // 2. ChatMessage 객체 생성
-      final message = ChatMessage(
-        chatId: messageDoc.id, // 위에서 생성한 ID
-        isSent: isSent,
-        content: content,
-        createdAt: DateTime.now(),
-      );
-
-      // 3. Firebase에 저장
-      await messageDoc.set(message.toJson());
+          .collection('chat')
+          .add(message.toJson());
       print('메시지 전송 성공');
     } catch (e) {
       print('메시지 전송 실패: $e');
@@ -40,7 +28,7 @@ class ChatMessageRepository {
       final querySnapshot = await firestore
           .collection('chatrooms')
           .doc(roomId)
-          .collection('messages')
+          .collection('chat')
           .orderBy('createdAt', descending: false) // 오래된 것부터
           .get();
 
@@ -62,7 +50,7 @@ class ChatMessageRepository {
       return firestore
           .collection('chatrooms')
           .doc(roomId)
-          .collection('messages')
+          .collection('chat')
           .orderBy('createdAt', descending: false) // 오래된 것부터
           .snapshots() // 실시간 감지
           .map((snapshot) {

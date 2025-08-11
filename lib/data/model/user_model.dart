@@ -9,8 +9,6 @@ class User {
   final String imageUrl; //프로필사진
 
   // 위치 정보
-  // final double latitude; // 위도
-  // final double longitude; // 경도
   final GeoPoint location; // 위치 정보 (GeoPoint 사용)
   final String? address; // 읽기 쉬운 주소
 
@@ -19,8 +17,6 @@ class User {
     required this.nickname,
     required this.introduction,
     required this.imageUrl,
-    // required this.latitude,
-    // required this.longitude,
     required this.location,
     this.address,
   });
@@ -32,8 +28,6 @@ class User {
       nickname: json['nickname'],
       introduction: json['introduction'],
       imageUrl: json['imageUrl'],
-      // latitude: json['latitude'],
-      // longitude: json['longitude'],
       location: json['location'] as GeoPoint,
       address: json['address'],
     );
@@ -46,8 +40,6 @@ class User {
       'nickname': nickname,
       'introduction': introduction,
       'imageUrl': imageUrl,
-      // 'latitude': latitude,
-      // 'longitude': longitude,
       'location': location,
       'address': address,
     };
