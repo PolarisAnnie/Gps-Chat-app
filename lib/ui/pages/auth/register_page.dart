@@ -51,6 +51,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final newUser = await viewModel.registerUser();
 
     if (newUser != null && mounted) {
+      // 회원가입 성공 후 현재 사용자 설정
       await UserRepository().setCurrentUserId(newUser.userId);
       Navigator.pushNamed(context, '/location', arguments: newUser);
     } else if (mounted) {

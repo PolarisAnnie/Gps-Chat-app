@@ -35,7 +35,7 @@ final chatMessageRepositoryProvider = Provider<ChatMessageRepository>((ref) {
 });
 
 final currentUserProvider = FutureProvider<User?>((ref) async {
-  return await UserRepository.getCurrentUser();
+  return await UserRepository().getCurrentUser(); // 🔧 인스턴스 생성 추가
 });
 
 // 채팅 페이지 비즈니스 로직
@@ -51,6 +51,11 @@ class ChatPageViewModel extends StateNotifier<ChatPageState> {
   }) : _messageRepository = messageRepository,
        _currentUser = currentUser,
        super(ChatPageState());
+
+  // 현재 사용자 정보 getter들 추가
+  String get currentUserId => _currentUser?.userId ?? "";
+  String get currentUserName => _currentUser?.nickname ?? "";
+  String get currentAddress => _currentUser?.address ?? "";
 
   // 실시간 메시지 받기 시작
   void startMessageStream() {
@@ -108,8 +113,17 @@ final chatPageViewModelProvider =
       ref,
       roomId,
     ) {
+      // 사용자 정보 가져오기 추가
+      final currentUserAsync = ref.watch(currentUserProvider);
+      final currentUser = currentUserAsync.when(
+        data: (user) => user,
+        loading: () => null,
+        error: (_, __) => null,
+      );
+
       return ChatPageViewModel(
         roomId: roomId,
+        currentUser: currentUser,
         messageRepository: ref.read(chatMessageRepositoryProvider),
       );
     });

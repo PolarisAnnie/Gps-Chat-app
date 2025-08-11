@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gps_chat_app/data/model/chat_message.dart';
 import 'package:gps_chat_app/ui/pages/chat/chat_view_model.dart';
 import 'package:gps_chat_app/ui/pages/chat/widgets/chat_bottom_sheet.dart';
 import 'package:gps_chat_app/ui/pages/chat/widgets/chat_recieve_item.dart';

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gps_chat_app/ui/pages/chat_room_list/chat_room_list_page.dart';
 import '../../../core/providers/viewmodels/main_navigation_viewmodel.dart';
 import '../home/home_page.dart';
-import '../chat/chat_page.dart';
 import '../profile/profile_page.dart';
 
 class MainNavigationPage extends ConsumerWidget {
@@ -17,7 +17,7 @@ class MainNavigationPage extends ConsumerWidget {
 
     final List<Widget> pages = [
       const HomePage(),
-      ChatPage(), // ChatPage는 임시로 기본 생성자 사용
+      ChatRoomListPage(), // ChatPage는 임시로 기본 생성자 사용
       ProfilePage(), // ProfilePage는 const가 아님
     ];
 
