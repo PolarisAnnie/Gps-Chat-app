@@ -125,18 +125,65 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // 주소에서 지역명 키워드 추출 함수
+  String extractLocationKeyword(String address) {
+    if (address.isEmpty) return '';
+
+    List<String> regions = [
+      '서울',
+      '부산',
+      '대구',
+      '인천',
+      '광주',
+      '대전',
+      '울산',
+      '세종',
+      '경기',
+      '강원',
+      '충북',
+      '충남',
+      '전북',
+      '전남',
+      '경북',
+      '경남',
+      '제주',
+      '전주',
+      '수원',
+      '천안',
+      '안산',
+      '용인',
+    ];
+
+    List<String> parts = address.split(' ');
+
+    for (var part in parts) {
+      for (var region in regions) {
+        if (part.contains(region)) {
+          return region;
+        }
+      }
+    }
+
+    return '';
+  }
+
   Future<void> fetchCafes() async {
     try {
-      // Get current position before creating the API service
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
       double latitude = position.latitude;
       double longitude = position.longitude;
 
+      print('카페 검색 위치: 위도=$latitude, 경도=$longitude');
+      print('현재 주소: $currentAddress');
+
+      final locationKeyword = extractLocationKeyword(currentAddress);
+
       final api = NaverApiService();
+
       final results = await api.searchLocal(
-        '카페',
+        locationKeyword.isEmpty ? '카페' : '$locationKeyword 카페',
         display: 5,
         latitude: latitude,
         longitude: longitude,
