@@ -18,7 +18,7 @@ class MainNavigationPage extends ConsumerWidget {
     final List<Widget> pages = [
       const HomePage(),
       ChatRoomListPage(),
-      ProfilePage(), // ProfilePage는 const가 아님
+      ProfilePage(),
     ];
 
     return Scaffold(
