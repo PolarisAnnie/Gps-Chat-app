@@ -85,11 +85,11 @@ class _RegisterPageState extends State<RegisterPage> {
       );
       // 3. 이미지 업로드 실패 시, 사용자에게 알리고 함수 종료
       if (imageUrl == null) {
-        // throw Exception('프로필 이미지 업로드에 실패했습니다.');
-        imageUrl = 'https://picsum.photos/200/300';
+        throw Exception('프로필 이미지 업로드에 실패했습니다.');
+        // imageUrl = 'https://picsum.photos/200/300'; //firestore연결 안됐을 때 기본 이미지로 불러오게 했었음
       }
-      // 4. User 객체 생성 (위치정보는 아직 없음)
 
+      // 4. User 객체 생성 (위치정보는 아직 없음)
       final newUser = User(
         userId: userId,
         nickname: _nicknameController.text,
