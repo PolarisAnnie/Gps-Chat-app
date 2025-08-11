@@ -7,33 +7,35 @@ class AuthViewModel extends StateNotifier<AuthState> {
 
   AuthViewModel() : super(const AuthState());
 
-  String? validateNickname(String nickname) {
+  String? _validateNickname(String nickname) {
+    if (nickname.isEmpty) {
+      return null; // 처음에는 에러 메시지 없음
+    }
     if (nickname.length < 4) {
       return '닉네임은 4글자 이상이어야 합니다.';
     }
-    return null;
+    return null; // 유효한 경우 null 반환
   }
 
   bool checkNicknameExists(String nickname) {
     return _nicknameList.contains(nickname);
   }
 
-  void setNickname(String nickname) {
-    state = state.copyWith(nickname: nickname);
-  }
+  // 기존 setNickname, setError를 이 메서드로 통합
+  void updateNickname(String nickname) {
+    final errorMessage = _validateNickname(nickname);
 
-  void setError(String? error) {
-    state = state.copyWith(errorMessage: error);
+    if (errorMessage == null) {
+      // 유효한 닉네임인 경우 에러 메시지 클리어
+      state = state.copyWith(nickname: nickname, clearErrorMessage: true);
+    } else {
+      // 유효하지 않은 닉네임인 경우 에러 메시지 설정
+      state = state.copyWith(nickname: nickname, errorMessage: errorMessage);
+    }
   }
 
   void setLoading(bool loading) {
     state = state.copyWith(isLoading: loading);
-  }
-
-  bool get isNicknameValid {
-    return state.nickname != null &&
-        state.nickname!.length >= 4 &&
-        validateNickname(state.nickname!) == null;
   }
 }
 

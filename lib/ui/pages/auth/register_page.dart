@@ -82,7 +82,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     child: Stack(
                       children: [
                         CircleAvatar(
-                          radius: 50,
+                          radius: 56,
                           backgroundColor: Color(0xFFdedede),
                           backgroundImage: state.profileImage != null
                               ? FileImage(state.profileImage!)
@@ -90,7 +90,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           child: state.profileImage == null
                               ? Icon(
                                   Icons.person,
-                                  size: 50,
+                                  size: 56,
                                   color: Color(0xFF535353),
                                 )
                               : null,
@@ -99,14 +99,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                           bottom: 0,
                           right: 0,
                           child: Container(
-                            padding: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
                               color: Color(0xFF98b2ff),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              Icons.camera_alt,
-                              size: 20,
+                              Icons.camera_alt_outlined,
+                              size: 18,
                               color: AppTheme.textOnPrimary,
                             ),
                           ),
@@ -165,37 +165,41 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 ),
               ),
               // 다음 단계로 이동 버튼
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: state.isFormValid && !state.isLoading
-                      ? _onNextPressed
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryColor,
-                    foregroundColor: AppTheme.textOnPrimary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+              Padding(
+                padding: const EdgeInsets.all(32),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: state.isFormValid && !state.isLoading
+                        ? _onNextPressed
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      foregroundColor: AppTheme.textOnPrimary,
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      disabledBackgroundColor: Colors.grey.shade600,
+                      disabledForegroundColor: Colors.white,
                     ),
-                    disabledBackgroundColor: Colors.grey.shade400,
+                    child: state.isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: AppTheme.textOnPrimary,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            '다음 단계로',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
-                  child: state.isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: AppTheme.textOnPrimary,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Text(
-                          '다음 단계로',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                 ),
               ),
             ],
