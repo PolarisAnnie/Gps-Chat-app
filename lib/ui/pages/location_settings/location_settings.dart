@@ -28,7 +28,7 @@ class _LocationSettingsState extends ConsumerState<LocationSettings> {
       // 성공적으로 업데이트되면 홈 화면으로 이동
       Navigator.pushNamedAndRemoveUntil(
         context,
-        '/home',
+        '/main',
         (route) => false, // 모든 이전 화면 제거
       );
     } else if (mounted) {

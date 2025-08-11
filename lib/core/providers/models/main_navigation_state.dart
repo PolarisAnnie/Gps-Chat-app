@@ -3,15 +3,9 @@ class MainNavigationState {
   final int currentIndex;
   final bool isLoading;
 
-  const MainNavigationState({
-    this.currentIndex = 0,
-    this.isLoading = false,
-  });
+  const MainNavigationState({this.currentIndex = 0, this.isLoading = false});
 
-  MainNavigationState copyWith({
-    int? currentIndex,
-    bool? isLoading,
-  }) {
+  MainNavigationState copyWith({int? currentIndex, bool? isLoading}) {
     return MainNavigationState(
       currentIndex: currentIndex ?? this.currentIndex,
       isLoading: isLoading ?? this.isLoading,

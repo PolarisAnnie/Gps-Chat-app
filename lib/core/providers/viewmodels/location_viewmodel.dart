@@ -10,8 +10,8 @@ class LocationViewModel extends StateNotifier<LocationState> {
   final UserRepository _userRepository;
   final NaverMapRepository _naverMapRepository;
 
-  LocationViewModel(this._userRepository, this._naverMapRepository) 
-      : super(const LocationState());
+  LocationViewModel(this._userRepository, this._naverMapRepository)
+    : super(const LocationState());
 
   /// 현재 위치 정보를 가져와서 상태 업데이트
   Future<void> fetchLocation() async {
@@ -48,7 +48,9 @@ class LocationViewModel extends StateNotifier<LocationState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final address = await _naverMapRepository.getAddressFromPosition(position);
+      final address = await _naverMapRepository.getAddressFromPosition(
+        position,
+      );
       state = state.copyWith(
         address: address,
         currentPosition: position,
@@ -105,8 +107,5 @@ class LocationViewModel extends StateNotifier<LocationState> {
 
 final locationViewModelProvider =
     StateNotifierProvider<LocationViewModel, LocationState>((ref) {
-      return LocationViewModel(
-        UserRepository(), 
-        NaverMapRepository(),
-      );
+      return LocationViewModel(UserRepository(), NaverMapRepository());
     });

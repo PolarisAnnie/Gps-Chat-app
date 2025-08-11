@@ -35,7 +35,7 @@ class MainNavigationViewModel extends StateNotifier<MainNavigationState> {
 }
 
 /// MainNavigation ViewModel Provider
-final mainNavigationViewModelProvider = 
+final mainNavigationViewModelProvider =
     StateNotifierProvider<MainNavigationViewModel, MainNavigationState>(
-  (ref) => MainNavigationViewModel(),
-);
+      (ref) => MainNavigationViewModel(),
+    );

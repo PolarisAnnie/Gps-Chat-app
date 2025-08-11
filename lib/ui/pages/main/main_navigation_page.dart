@@ -11,7 +11,9 @@ class MainNavigationPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final navigationState = ref.watch(mainNavigationViewModelProvider);
-    final navigationViewModel = ref.read(mainNavigationViewModelProvider.notifier);
+    final navigationViewModel = ref.read(
+      mainNavigationViewModelProvider.notifier,
+    );
 
     final List<Widget> pages = [
       const HomePage(),

@@ -8,7 +8,7 @@ class NaverMapRepository {
   final NaverMapService _naverMapService;
 
   NaverMapRepository({NaverMapService? naverMapService})
-      : _naverMapService = naverMapService ?? NaverMapService();
+    : _naverMapService = naverMapService ?? NaverMapService();
 
   /// 위치 좌표를 주소로 변환
   /// Service의 결과를 Repository 레벨에서 처리하여 일관된 응답 형태로 반환
@@ -41,8 +41,8 @@ class NaverMapRepository {
   Future<bool> checkLocationPermission() async {
     try {
       LocationPermission permission = await Geolocator.checkPermission();
-      return permission != LocationPermission.denied && 
-             permission != LocationPermission.deniedForever;
+      return permission != LocationPermission.denied &&
+          permission != LocationPermission.deniedForever;
     } catch (e) {
       return false;
     }
@@ -52,8 +52,8 @@ class NaverMapRepository {
   Future<bool> requestLocationPermission() async {
     try {
       LocationPermission permission = await Geolocator.requestPermission();
-      return permission != LocationPermission.denied && 
-             permission != LocationPermission.deniedForever;
+      return permission != LocationPermission.denied &&
+          permission != LocationPermission.deniedForever;
     } catch (e) {
       return false;
     }

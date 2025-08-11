@@ -67,55 +67,61 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        appBar: AppBar(title: const Text('회원가입')),
+        appBar: AppBar(title: const Text('회원가입'), centerTitle: true),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              children: [
-                Expanded(
-                  child: ListView(
-                    children: [
-                      // 프로필 이미지 선택
-                      Center(
-                        child: GestureDetector(
-                          onTap: _pickImage,
-                          child: Stack(
-                            children: [
-                              CircleAvatar(
-                                radius: 50,
-                                backgroundImage: state.profileImage != null
-                                    ? FileImage(state.profileImage!)
-                                    : null,
-                                child: state.profileImage == null
-                                    ? Icon(
-                                        Icons.person,
-                                        size: 50,
-                                        color: AppTheme.textTertiary,
-                                      )
-                                    : null,
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.primaryColor,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.camera_alt,
-                                    size: 20,
-                                    color: AppTheme.textOnPrimary,
-                                  ),
-                                ),
-                              ),
-                            ],
+          child: Column(
+            children: [
+              // 프로필 이미지 선택
+              Container(
+                color: AppTheme.primaryColor,
+                height: 180,
+                // padding: const EdgeInsets.all(32),
+                child: Center(
+                  child: GestureDetector(
+                    onTap: _pickImage,
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 50,
+                          backgroundColor: Color(0xFFdedede),
+                          backgroundImage: state.profileImage != null
+                              ? FileImage(state.profileImage!)
+                              : null,
+                          child: state.profileImage == null
+                              ? Icon(
+                                  Icons.person,
+                                  size: 50,
+                                  color: Color(0xFF535353),
+                                )
+                              : null,
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF98b2ff),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.camera_alt,
+                              size: 20,
+                              color: AppTheme.textOnPrimary,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: ListView(
+                    children: [
+                      // const SizedBox(height: 40),
                       // 닉네임 입력
                       TextField(
                         controller: _nicknameController,
@@ -157,42 +163,42 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     ],
                   ),
                 ),
-                // 다음 단계로 이동 버튼
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: state.isFormValid && !state.isLoading
-                        ? _onNextPressed
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryColor,
-                      foregroundColor: AppTheme.textOnPrimary,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      disabledBackgroundColor: Colors.grey.shade400,
+              ),
+              // 다음 단계로 이동 버튼
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: state.isFormValid && !state.isLoading
+                      ? _onNextPressed
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.primaryColor,
+                    foregroundColor: AppTheme.textOnPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    child: state.isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: AppTheme.textOnPrimary,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : const Text(
-                            '다음 단계로',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                    disabledBackgroundColor: Colors.grey.shade400,
                   ),
+                  child: state.isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: AppTheme.textOnPrimary,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          '다음 단계로',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

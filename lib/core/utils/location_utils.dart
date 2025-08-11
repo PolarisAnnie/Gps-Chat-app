@@ -19,7 +19,7 @@ class LocationUtils {
     try {
       // 1. 위치 권한 확인 및 요청 (Repository 메서드 활용)
       bool hasPermission = await _naverMapRepository.checkLocationPermission();
-      
+
       if (!hasPermission) {
         hasPermission = await _naverMapRepository.requestLocationPermission();
         if (!hasPermission) {
@@ -34,11 +34,12 @@ class LocationUtils {
       );
 
       // 3. Repository를 통해 좌표를 주소로 변환
-      String address = await _naverMapRepository.getAddressFromPosition(position);
+      String address = await _naverMapRepository.getAddressFromPosition(
+        position,
+      );
 
       // 4. 위치 데이터와 변환된 주소를 LocationData 객체로 반환
       return LocationData(position: position, address: address);
-      
     } catch (e) {
       print('위치 정보를 가져오는 데 실패했습니다: $e');
       return null; // 오류 발생 시 null 반환
@@ -50,7 +51,7 @@ class LocationUtils {
     return await _naverMapRepository.checkLocationPermission();
   }
 
-  /// 위치 권한 요청하는 유틸리티 메서드  
+  /// 위치 권한 요청하는 유틸리티 메서드
   static Future<bool> requestLocationPermission() async {
     return await _naverMapRepository.requestLocationPermission();
   }

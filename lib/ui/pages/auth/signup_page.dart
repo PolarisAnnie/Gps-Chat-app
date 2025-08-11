@@ -46,7 +46,7 @@ class _SignupPageState extends ConsumerState<SignupPage> {
       // 중복된 닉네임인 경우, 홈화면으로 이동
       Navigator.pushReplacementNamed(
         context,
-        '/home',
+        '/main',
         arguments: {'nickname': inputText},
       );
     } else {
