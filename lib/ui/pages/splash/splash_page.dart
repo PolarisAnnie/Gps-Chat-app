@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/ui/pages/auth/signup_page.dart';
 
-class SplashPage extends StatefulWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
+class _SplashPageState extends ConsumerState<SplashPage>
+    with TickerProviderStateMixin {
   late AnimationController catMoveController;
   late AnimationController devController;
   late AnimationController potController;
@@ -75,13 +77,13 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       await Future.delayed(const Duration(milliseconds: 300));
       bubbleController.forward();
 
-      // 3초 딜레이를 준 후 메인 화면으로 이동
+      // 3초 후 다음 화면으로 이동
       await Future.delayed(const Duration(seconds: 3));
-
-      // 화면 전환
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (context) => SignupPage()));
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const SignupPage()),
+        );
+      }
     });
   }
 
@@ -98,6 +100,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
