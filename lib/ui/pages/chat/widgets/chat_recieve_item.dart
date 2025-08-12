@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
 
-class ChatReceiveItem extends StatelessWidget {
+class ChatReceiveItem extends ConsumerWidget {
   ChatReceiveItem({
     required this.imageUrl,
     required this.nickname,
@@ -15,7 +16,7 @@ class ChatReceiveItem extends StatelessWidget {
   final ChatMessage message;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -26,6 +27,13 @@ class ChatReceiveItem extends StatelessWidget {
           child: GestureDetector(
             onTap: () {
               print('프로필 이미지 클릭');
+              // TODO: MemberDetailPage 완성 후 네비게이션 연결
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => MemberDetailPage(userId: otherUserId),
+              //   ),
+              // );
             },
             child: ClipOval(
               child: Image.network(
