@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gps_chat_app/ui/pages/auth/signup_page.dart';
+import 'package:gps_chat_app/ui/pages/welcome/auth/signup_page.dart';
 
+// 앱 첫 실행 시 보여지는 스플래시 페이지
+// 애니메이션과 함께 앱의 로고와 이름을 보여줌
+// 소린의 노가다와 피땀눈물
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
