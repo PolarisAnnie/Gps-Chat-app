@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
           user: ModalRoute.of(context)!.settings.arguments as User,
         ),
         '/main': (context) => MainNavigationPage(), // 메인 네비게이션으로 변경
-        // '/chat': (context) => ChatRoomListPage(), // 개별 채팅방용
+        '/chat': (context) => ChatRoomListPage(), // 개별 채팅방용
       },
     );
   }

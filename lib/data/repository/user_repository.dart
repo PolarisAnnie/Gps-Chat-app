@@ -104,7 +104,10 @@ class UserRepository {
       return users;
     } catch (e) {
       debugPrint('주소 기반 사용자 목록 조회 실패: $e');
-      return []; // 오류 발생 시 빈 리스트 반환
+      return [];
+    } // 오류 발생 시 빈 리스트 반환
+  }
+
   // 사용자 정보 업데이트
   Future<bool> updateUser(User user) async {
     try {
