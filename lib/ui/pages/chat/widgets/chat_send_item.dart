@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gps_chat_app/core/providers/viewmodels/main_navigation_viewmodel.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
+import 'package:gps_chat_app/ui/pages/profile/profile_page.dart';
 
 class ChatSendItem extends ConsumerWidget {
   ChatSendItem({
@@ -58,9 +58,22 @@ class ChatSendItem extends ConsumerWidget {
           width: 32,
           child: GestureDetector(
             onTap: () {
-              print('프로필 이미지 클릭');
-              // 내 프로필 탭으로 이동
-              ref.read(mainNavigationViewModelProvider.notifier).changeTab(2);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  fullscreenDialog: true, // 모달 스타일로 표시
+                  builder: (context) => Scaffold(
+                    appBar: AppBar(
+                      title: Text('내 프로필'),
+                      leading: IconButton(
+                        icon: Icon(Icons.close), // X 버튼
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                    body: ProfilePage(),
+                  ),
+                ),
+              );
             },
             child: ClipOval(
               child: Image.network(

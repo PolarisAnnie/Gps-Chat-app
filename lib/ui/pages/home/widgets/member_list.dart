@@ -1,47 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gps_chat_app/core/providers/viewmodels/nearby_users_provider.dart';
 import 'package:gps_chat_app/core/theme/theme.dart';
 import 'package:gps_chat_app/data/model/chat_room.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/data/repository/chat_room_repository.dart';
 import 'package:gps_chat_app/ui/pages/chat/chat_page.dart';
-import 'package:gps_chat_app/ui/pages/chat/chat_view_model.dart';
 import 'package:gps_chat_app/ui/pages/home/member_detail.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart'; // ✨ 1. 패키지 import
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class MemberList extends ConsumerStatefulWidget {
-  final List<User> members; // 데이터를 외부에서 받도록 수정
-
+  final List<User> members;
   const MemberList({Key? key, required this.members}) : super(key: key);
 
   @override
   ConsumerState<MemberList> createState() => _MemberListState();
 }
 
-class _MemberListState extends ConsumerState<MemberList> {
+class _MemberListState extends ConsumerState<MemberList>
+    with WidgetsBindingObserver {
   PageController _pageController = PageController();
-  final ChatRoomRepository _chatRoomRepository =
-      ChatRoomRepository(); // Repository 인스턴스 생성
+  final ChatRoomRepository _chatRoomRepository = ChatRoomRepository();
 
-  // // 임시 멤버 데이터 (기존과 동일)
-  // final List<Map<String, String>> members = [
-  //   {'name': '영호느님', 'message': 'flutter 앱 창업 준비중입니다!'},
-  //   {'name': '민수킴', 'message': '코딩 스터디 같이 하실 분!'},
-  //   {'name': '지은양', 'message': '카페에서 개발 중이에요 ☕'},
-  //   {'name': '준호님', 'message': 'React Native 경험 많아요'},
-  //   {'name': '수빈이', 'message': 'UI/UX 디자이너입니다'},
-  //   {'name': '현우형', 'message': '백엔드 개발자 구해요!'},
-  //   {'name': '예린님', 'message': '스타트업 투자 관련 일해요'},
-  //   {'name': '태민이', 'message': '새로운 프로젝트 시작!'},
-  // ];
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+
+    // 최초 진입 시 한 번만 새로고침
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshMembers();
+    });
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
     super.dispose();
   }
 
-  // 4개씩 그룹으로 나누기
+  // 앱 복귀 시 새로고침
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _refreshMembers();
+    }
+  }
+
+  void _refreshMembers() {
+    ref.refresh(nearbyUsersProvider);
+    print('🟦 멤버 리스트 새로고침');
+  }
+
   List<List<User>> get memberGroups {
     List<List<User>> groups = [];
     if (widget.members.isEmpty) return groups;
@@ -58,10 +69,11 @@ class _MemberListState extends ConsumerState<MemberList> {
   Future<void> _startChat(User otherUser) async {
     final currentUser = await ref.read(currentUserProvider.future);
     if (currentUser == null) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('사용자 정보를 불러올 수 없습니다.')));
+      }
       return;
     }
 
@@ -92,46 +104,33 @@ class _MemberListState extends ConsumerState<MemberList> {
         );
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('오류가 발생했습니다: $e')));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // 현재 주소에 속한 멤버가 없을 경우
     if (widget.members.isEmpty) {
       return Container(
         width: double.infinity,
-        height: 100, // 높이 조절하기
-        // padding: EdgeInsets.all(16),
-        margin: EdgeInsets.symmetric(horizontal: 16),
+        height: 100,
+        margin: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: Colors.grey.shade200,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Center(
-          child: const Text(
-            '주변에 연결 가능한 개발자 친구가 없어요🥹',
-            // textAlign: TextAlign.center,
-            // style: TextStyle(
-            //   fontSize: 16,
-            //   color: AppTheme.textPrimary,
-            //   fontWeight: FontWeight.w500,
-            // ),
-          ),
-        ),
+        child: const Center(child: Text('주변에 연결 가능한 개발자 친구가 없어요🥹')),
       );
     }
 
-    // 현재 주소에 속한 멤버가 있을 경우
-    /// PageView.builder로 슬라이드 기능 구현
     return Column(
       children: [
         SizedBox(
-          height: 280, // 4개 항목 높이에 맞춰 고정
+          height: 280,
           child: PageView.builder(
             controller: _pageController,
             itemCount: memberGroups.length,
@@ -144,16 +143,12 @@ class _MemberListState extends ConsumerState<MemberList> {
                   children: List.generate(pageMembers.length, (index) {
                     final member = pageMembers[index];
                     return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 6.0,
-                      ), // 아이템 간 간격
+                      padding: const EdgeInsets.symmetric(vertical: 6.0),
                       child: Column(
                         children: [
                           GestureDetector(
-                            behavior: HitTestBehavior.opaque, // 빈 공간도 터치 인식
-
+                            behavior: HitTestBehavior.opaque,
                             onTap: () {
-                              // 프로필로 이동
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -166,7 +161,6 @@ class _MemberListState extends ConsumerState<MemberList> {
                               children: [
                                 CircleAvatar(
                                   radius: 24,
-                                  // networkImage를 사용하여 전달받은 User 객체의 이미지 경로를 사용
                                   backgroundImage: NetworkImage(
                                     member.imageUrl,
                                   ),
@@ -220,13 +214,9 @@ class _MemberListState extends ConsumerState<MemberList> {
                               ],
                             ),
                           ),
-                          // 마지막 항목이 아니면 구분선 추가
                           if (index < pageMembers.length - 1)
                             Container(
-                              margin: const EdgeInsets.only(
-                                top: 12,
-                                left: 60,
-                              ), // 프로필 사진 오른쪽부터 시작
+                              margin: const EdgeInsets.only(top: 12, left: 60),
                               height: 1,
                               color: Colors.grey.shade300,
                             ),
@@ -239,18 +229,15 @@ class _MemberListState extends ConsumerState<MemberList> {
             },
           ),
         ),
-        SizedBox(height: 12),
-
-        // 페이지 표시기(indicator) 위젯 추가
-        // PageController와 연동하여 현재 페이지를 추적하고, 그에 따라 점들의 색상이 바뀌도록!!!
+        const SizedBox(height: 12),
         SmoothPageIndicator(
-          controller: _pageController, // PageView의 컨트롤러 연결
-          count: memberGroups.length, // 전체 페이지 수
+          controller: _pageController,
+          count: memberGroups.length,
           effect: WormEffect(
             dotHeight: 8.0,
             dotWidth: 8.0,
-            activeDotColor: Theme.of(context).primaryColor, // 활성화된 점 색상
-            dotColor: Colors.grey.shade300, // 비활성화된 점 색상
+            activeDotColor: Theme.of(context).primaryColor,
+            dotColor: Colors.grey.shade300,
           ),
         ),
       ],
