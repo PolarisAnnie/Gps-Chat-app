@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gps_chat_app/core/providers/viewmodels/main_navigation_viewmodel.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
 import 'package:gps_chat_app/ui/pages/chat/chat_view_model.dart';
@@ -61,7 +62,27 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(otherUser?.nickname ?? '채팅')),
+      appBar: AppBar(
+        title: Text(otherUser?.nickname ?? '채팅'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            // 현재 스택에 뭐가 있든 상관없이 메인으로 가서 채팅 탭으로 설정
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/main',
+              (route) => false, // 모든 스택 제거하고 메인만 남김
+            );
+
+            // 메인 페이지로 이동 후 채팅 탭(index 1)으로 설정
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final navigationViewModel = ref.read(
+                mainNavigationViewModelProvider.notifier,
+              );
+              navigationViewModel.changeTab(1); // 채팅 탭으로 변경
+            });
+          },
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: ListView.builder(
