@@ -29,7 +29,9 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   flutter:
-    sdk: flutter
+    sdk: flutter 
+  flutter_dotenv: ^5.0.2
+  url_launcher: ^6.3.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -37,12 +39,28 @@ dependencies:
   firebase_core: ^4.0.0
   firebase_auth: ^6.0.0
   cloud_firestore: ^6.0.0
+  firebase_storage: ^13.0.0
   geolocator: ^14.0.2
+  geocoding: ^4.0.0 # 소린 추가: 좌표를 주소로 변환하기 위함
   permission_handler: ^12.0.1
+  image_picker: ^1.0.4  # 추가
+  flutter_native_splash: ^2.4.6
+  http: ^1.5.0
+  intl: ^0.20.2
+  dio: ^5.1.0
+  flutter_riverpod: ^2.6.1
+  freezed_annotation: ^2.4.4
+  shared_preferences: ^2.5.3
+  smooth_page_indicator: ^1.2.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: ^2.4.14 # 특강 추가
+  riverpod_generator: ^2.6.1 # 특강 추가
+  freezed: ^2.5.7
+  json_annotation: ^4.9.0
+  json_serializable: ^6.8.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -65,6 +83,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -77,12 +96,27 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+  fonts:
+    - family: Paperlogy
+      fonts:
+        - asset: assets/fonts/Paperlogy-1Thin.ttf
+          weight: 100
+        - asset: assets/fonts/Paperlogy-2ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/Paperlogy-3Light.ttf
+          weight: 300
+        - asset: assets/fonts/Paperlogy-4Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Paperlogy-5Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Paperlogy-6SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Paperlogy-7Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Paperlogy-8ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Paperlogy-9Black.ttf
+          weight: 900
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf
