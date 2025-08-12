@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart'; // riverpod import
 import 'package:gps_chat_app/core/theme/theme.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/firebase_options.dart';
-import 'package:gps_chat_app/ui/pages/chat_room_list/chat_room_list_page.dart';
+import 'package:gps_chat_app/ui/pages/home/home_page.dart';
 
 import 'package:gps_chat_app/ui/pages/main/main_navigation_page.dart';
 import 'package:gps_chat_app/ui/pages/welcome/auth/register_page.dart';
@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
       title: 'GPS Chat App',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const SplashPage(),
+      home: const HomePage(),
       routes: {
         '/splash': (context) => const SplashPage(),
         '/signup': (context) => SignupPage(),
