@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
@@ -105,6 +107,9 @@ class UserRepository {
     } catch (e) {
       debugPrint('주소 기반 사용자 목록 조회 실패: $e');
       return []; // 오류 발생 시 빈 리스트 반환
+    }
+  }
+
   // 사용자 정보 업데이트
   Future<bool> updateUser(User user) async {
     try {
