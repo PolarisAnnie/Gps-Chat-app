@@ -15,21 +15,10 @@ class ProfilePage extends ConsumerWidget {
     final profileState = ref.watch(profileViewModelProvider);
     final profileViewModel = ref.read(profileViewModelProvider.notifier);
 
-    // 페이지가 표시될 때마다 사용자 데이터 새로 로드
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (profileState.user == null && !profileState.isLoading) {
-        profileViewModel.loadUserData();
-      }
-    });
-
-    // 에러 및 성공 메시지 처리
+    // 에러 처리
     ref.listen<ProfileState>(profileViewModelProvider, (previous, next) {
       if (next.error != null) {
-        if (next.error == 'IMAGE_UPDATE_SUCCESS') {
-          _showSnackBar(context, '프로필 사진이 변경되었습니다.');
-        } else {
-          _showSnackBar(context, next.error!, isError: true);
-        }
+        _showSnackBar(context, next.error!, isError: true);
         profileViewModel.clearError();
       }
     });
@@ -72,14 +61,7 @@ class ProfilePage extends ConsumerWidget {
       padding: const EdgeInsets.all(24.0),
       child: Column(
         children: [
-          ProfileCard(
-            user: state.user!,
-            isEditing: state.isEditing,
-            isSaving: state.isSaving,
-            onImageTap: state.isEditing && !state.isSaving
-                ? () => viewModel.pickProfileImage()
-                : null,
-          ),
+          ProfileCard(user: state.user!),
           const SizedBox(height: 32),
           if (!state.isEditing) ...[
             _buildEditButton(viewModel),
@@ -159,68 +141,64 @@ class ProfilePage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Consumer(
-          builder: (context, ref, child) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: const Text(
-                '로그아웃',
-                style: TextStyle(
-                  fontFamily: 'Paperlogy',
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              content: const Text(
-                '정말로 로그아웃하시겠습니까?',
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            '로그아웃',
+            style: TextStyle(
+              fontFamily: 'Paperlogy',
+              fontWeight: FontWeight.w600,
+              color: AppTheme.textPrimary,
+            ),
+          ),
+          content: const Text(
+            '정말로 로그아웃하시겠습니까?',
+            style: TextStyle(
+              fontFamily: 'Paperlogy',
+              color: AppTheme.textSecondary,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                '취소',
                 style: TextStyle(
                   fontFamily: 'Paperlogy',
                   color: AppTheme.textSecondary,
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text(
-                    '취소',
-                    style: TextStyle(
-                      fontFamily: 'Paperlogy',
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final success = await viewModel.logout();
+                if (success && context.mounted) {
+                  _showSnackBar(context, '로그아웃되었습니다.');
+                  // 로그인 페이지로 이동
+                  Navigator.of(
+                    context,
+                  ).pushNamedAndRemoveUntil('/signup', (route) => false);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    Navigator.of(context).pop();
-                    final success = await viewModel.logout();
-                    if (success && context.mounted) {
-                      _showSnackBar(context, '로그아웃되었습니다.');
-                      // 단순히 signup 페이지로 이동
-                      Navigator.of(
-                        context,
-                      ).pushNamedAndRemoveUntil('/signup', (route) => false);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text(
-                    '로그아웃',
-                    style: TextStyle(
-                      fontFamily: 'Paperlogy',
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
+              ),
+              child: const Text(
+                '로그아웃',
+                style: TextStyle(
+                  fontFamily: 'Paperlogy',
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
                 ),
-              ],
-            );
-          },
+              ),
+            ),
+          ],
         );
       },
     );
@@ -292,31 +270,26 @@ class ProfilePage extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Consumer(
-                    builder: (context, ref, child) {
-                      return ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                            '/signup',
-                            (route) => false,
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const Text(
-                          '로그인하기',
-                          style: TextStyle(
-                            fontFamily: 'Paperlogy',
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      );
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(
+                        context,
+                      ).pushNamedAndRemoveUntil('/signup', (route) => false);
                     },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text(
+                      '로그인하기',
+                      style: TextStyle(
+                        fontFamily: 'Paperlogy',
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ],

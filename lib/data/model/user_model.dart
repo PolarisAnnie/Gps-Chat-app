@@ -44,23 +44,4 @@ class User {
       'address': address,
     };
   }
-
-  // copyWith 메서드 추가
-  User copyWith({
-    String? userId,
-    String? nickname,
-    String? introduction,
-    String? imageUrl,
-    GeoPoint? location,
-    String? address,
-  }) {
-    return User(
-      userId: userId ?? this.userId,
-      nickname: nickname ?? this.nickname,
-      introduction: introduction ?? this.introduction,
-      imageUrl: imageUrl ?? this.imageUrl,
-      location: location ?? this.location,
-      address: address ?? this.address,
-    );
-  }
 }

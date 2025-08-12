@@ -89,7 +89,7 @@ class _ProfileEditFormState extends State<ProfileEditForm> {
           style: const TextStyle(fontFamily: 'Paperlogy', fontSize: 16),
           maxLength: 20,
         ),
-        // const SizedBox(height: 4),
+        const SizedBox(height: 16),
         // 소개 입력
         const Text(
           '소개',
@@ -136,85 +136,69 @@ class _ProfileEditFormState extends State<ProfileEditForm> {
           ),
           style: const TextStyle(fontFamily: 'Paperlogy', fontSize: 16),
         ),
-        const SizedBox(height: 16),
-
-        Row(
-          children: [
-            // 취소 버튼(왼쪽)
-            Expanded(
-              child: SizedBox(
-                height: 48,
-                child: TextButton(
-                  onPressed: widget.onCancel,
-
-                  style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(32),
-                      side: const BorderSide(
-                        color: AppTheme.textSecondary, // 테두리 색상
-                        width: 1,
-                      ),
-                    ),
+        const SizedBox(height: 32),
+        // 저장하기 버튼
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: ElevatedButton(
+            onPressed: widget.isSaving
+                ? null
+                : () => widget.onSave(
+                    _nicknameController.text,
+                    _introductionController.text,
                   ),
-                  child: const Text(
-                    '취소',
+            style: ElevatedButton.styleFrom(
+              backgroundColor: widget.isSaving
+                  ? Colors.grey
+                  : AppTheme.primaryColor,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              elevation: 0,
+            ),
+            child: widget.isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : const Text(
+                    '저장하기',
                     style: TextStyle(
                       fontFamily: 'Paperlogy',
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.textSecondary,
                     ),
                   ),
-                ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        // 취소 버튼
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: TextButton(
+            onPressed: widget.onCancel,
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
-
-            const SizedBox(width: 12),
-
-            // 저장하기 버튼
-            Expanded(
-              child: SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: widget.isSaving
-                      ? null
-                      : () => widget.onSave(
-                          _nicknameController.text,
-                          _introductionController.text,
-                        ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: widget.isSaving
-                        ? Colors.grey
-                        : AppTheme.primaryColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: widget.isSaving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
-                            ),
-                          ),
-                        )
-                      : const Text(
-                          '저장하기',
-                          style: TextStyle(
-                            fontFamily: 'Paperlogy',
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                ),
+            child: const Text(
+              '취소',
+              style: TextStyle(
+                fontFamily: 'Paperlogy',
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textSecondary,
               ),
             ),
-          ],
+          ),
         ),
       ],
     );
