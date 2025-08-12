@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
+import 'package:gps_chat_app/data/repository/storage_repository.dart';
 
 // 프로필 상태 클래스
 class ProfileState {
@@ -43,8 +46,10 @@ class ProfileState {
 // ProfileViewModel
 class ProfileViewModel extends StateNotifier<ProfileState> {
   final UserRepository _userRepository;
+  final StorageRepository _storageRepository;
 
-  ProfileViewModel(this._userRepository) : super(const ProfileState()) {
+  ProfileViewModel(this._userRepository, this._storageRepository)
+    : super(const ProfileState()) {
     loadUserData();
   }
 
@@ -169,12 +174,79 @@ class ProfileViewModel extends StateNotifier<ProfileState> {
     }
   }
 
+  // 프로필 이미지 업데이트 기능
+  Future<bool> updateProfileImage(File imageFile) async {
+    final currentUser = state.user;
+    if (currentUser == null || state.isSaving) return false;
+
+    state = state.copyWith(isSaving: true);
+
+    try {
+      // 이미지 업로드
+      final imageUrl = await _storageRepository.uploadProfileImage(
+        filePath: imageFile.path,
+        userId: currentUser.userId,
+      );
+
+      if (imageUrl == null) {
+        state = state.copyWith(
+          isSaving: false,
+          error: '이미지 업로드에 실패했습니다. 다시 시도해주세요.',
+        );
+        return false;
+      }
+
+      // Firebase 사용자 정보 업데이트
+      final updatedUser = currentUser.copyWith(imageUrl: imageUrl);
+
+      final success = await _userRepository.updateUser(updatedUser);
+
+      if (success) {
+        state = state.copyWith(user: updatedUser, isSaving: false);
+        return true;
+      } else {
+        state = state.copyWith(
+          isSaving: false,
+          error: '이미지 업데이트에 실패했습니다. 다시 시도해주세요.',
+        );
+        return false;
+      }
+    } catch (e) {
+      debugPrint('프로필 이미지 업데이트 오류: $e');
+      state = state.copyWith(isSaving: false, error: '이미지 업데이트 중 오류가 발생했습니다.');
+      return false;
+    }
+  }
+
+  // 이미지 선택 기능
+  Future<void> pickProfileImage() async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 80,
+      );
+
+      if (pickedFile != null) {
+        final success = await updateProfileImage(File(pickedFile.path));
+        if (success) {
+          // 성공 메시지는 UI에서 처리하기 위해 상태에 저장
+          state = state.copyWith(error: 'IMAGE_UPDATE_SUCCESS');
+        }
+      }
+    } catch (e) {
+      state = state.copyWith(error: '이미지를 선택할 수 없습니다.');
+    }
+  }
+
   // 로그아웃 기능
   Future<bool> logout() async {
     try {
       await _userRepository.logout();
-      // 상태 초기화
-      state = const ProfileState();
+      // 상태를 완전히 초기화 (user를 null로 설정)
+      state = const ProfileState(user: null, isLoading: false);
       return true;
     } catch (e) {
       debugPrint('로그아웃 실패: $e');
@@ -193,8 +265,13 @@ final userRepositoryProvider = Provider<UserRepository>(
   (ref) => UserRepository(),
 );
 
+final storageRepositoryProvider = Provider<StorageRepository>(
+  (ref) => StorageRepository(),
+);
+
 final profileViewModelProvider =
     StateNotifierProvider<ProfileViewModel, ProfileState>((ref) {
       final userRepository = ref.watch(userRepositoryProvider);
-      return ProfileViewModel(userRepository);
+      final storageRepository = ref.watch(storageRepositoryProvider);
+      return ProfileViewModel(userRepository, storageRepository);
     });

@@ -15,10 +15,21 @@ class ProfilePage extends ConsumerWidget {
     final profileState = ref.watch(profileViewModelProvider);
     final profileViewModel = ref.read(profileViewModelProvider.notifier);
 
-    // 에러 처리
+    // 페이지가 표시될 때마다 사용자 데이터 새로 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (profileState.user == null && !profileState.isLoading) {
+        profileViewModel.loadUserData();
+      }
+    });
+
+    // 에러 및 성공 메시지 처리
     ref.listen<ProfileState>(profileViewModelProvider, (previous, next) {
       if (next.error != null) {
-        _showSnackBar(context, next.error!, isError: true);
+        if (next.error == 'IMAGE_UPDATE_SUCCESS') {
+          _showSnackBar(context, '프로필 사진이 변경되었습니다.');
+        } else {
+          _showSnackBar(context, next.error!, isError: true);
+        }
         profileViewModel.clearError();
       }
     });
@@ -61,7 +72,14 @@ class ProfilePage extends ConsumerWidget {
       padding: const EdgeInsets.all(24.0),
       child: Column(
         children: [
-          ProfileCard(user: state.user!),
+          ProfileCard(
+            user: state.user!,
+            isEditing: state.isEditing,
+            isSaving: state.isSaving,
+            onImageTap: state.isEditing && !state.isSaving
+                ? () => viewModel.pickProfileImage()
+                : null,
+          ),
           const SizedBox(height: 32),
           if (!state.isEditing) ...[
             _buildEditButton(viewModel),
