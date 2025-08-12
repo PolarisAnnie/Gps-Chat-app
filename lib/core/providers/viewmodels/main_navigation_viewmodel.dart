@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/main_navigation_state.dart';
+import '../states/main_navigation_state.dart';
 
 /// MainNavigation 화면 ViewModel
 /// 하단 네비게이션 탭 상태 관리

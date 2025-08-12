@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gps_chat_app/data/model/chat_room.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
@@ -87,5 +88,37 @@ class ChatRoomRepository {
       print('채팅방 스트림 오류: $e');
       throw Exception('실시간 채팅방 수신에 실패했습니다: $e');
     }
+  }
+
+  // ----- 소린 추가 -------
+
+  /// 두 참여자 ID로 기존 채팅방을 찾는 메서드
+
+  Future<String?> findChatRoomByParticipants(
+    String userId1,
+    String userId2,
+  ) async {
+    // 가능성 1: 내가 시작한 채팅방 (내가 currentUserId인 경우)
+    var query1 = await firestore
+        .collection('chatrooms')
+        .where('currentUserId', isEqualTo: userId1)
+        .where('otherUserId', isEqualTo: userId2)
+        .limit(1)
+        .get();
+
+    if (query1.docs.isNotEmpty) return query1.docs.first.id;
+
+    // 가능성 2: 상대가 시작한 채팅방 (내가 otherUserId인 경우)
+    var query2 = await firestore
+        .collection('chatrooms')
+        .where('currentUserId', isEqualTo: userId2)
+        .where('otherUserId', isEqualTo: userId1)
+        .limit(1)
+        .get();
+
+    if (query2.docs.isNotEmpty) return query2.docs.first.id;
+
+    // 두 경우 모두 없으면 null 반환
+    return null;
   }
 }

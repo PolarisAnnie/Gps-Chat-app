@@ -49,6 +49,9 @@ class _ChatDetailBottomSheetState extends ConsumerState<ChatBottomSheet> {
   Widget build(BuildContext context) {
     final state = ref.watch(chatPageViewModelProvider(widget.roomId));
     final hasText = state.newMessageText.trim().isNotEmpty;
+    final viewModel = ref.read(
+      chatPageViewModelProvider(widget.roomId).notifier,
+    );
 
     return Container(
       height: 70 + widget.bottomPadding,
@@ -75,6 +78,8 @@ class _ChatDetailBottomSheetState extends ConsumerState<ChatBottomSheet> {
                 children: [
                   Expanded(
                     child: TextField(
+                      controller: controller,
+                      onChanged: viewModel.onTextChanged,
                       decoration: InputDecoration(
                         hintText: "Message",
                         hintStyle: TextStyle(
@@ -83,7 +88,6 @@ class _ChatDetailBottomSheetState extends ConsumerState<ChatBottomSheet> {
                         ),
                         border: InputBorder.none,
                       ),
-                      controller: controller,
                       onSubmitted: (v) => onSend(),
                     ),
                   ),
