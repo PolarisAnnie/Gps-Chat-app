@@ -74,8 +74,6 @@ lib/
                 └── profile_edit_form.dart  # 프로필 수정 폼
 ```
 
----
-
 #### Core Layer (core/)
 - providers/: Riverpod 기반 상태 관리 (ViewModel 패턴)
 - services/: Firebase Storage, Naver Map API 등 외부 서비스 연동
