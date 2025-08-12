@@ -7,8 +7,14 @@ import 'package:gps_chat_app/data/model/user_model.dart';
 
 class LocationSettings extends ConsumerStatefulWidget {
   final User user;
+  //홈에서 왔는지 확인하는 플래그 추가
+  final bool isFromHomePage;
 
-  const LocationSettings({super.key, required this.user});
+  const LocationSettings({
+    super.key,
+    required this.user,
+    this.isFromHomePage = false,
+  });
 
   @override
   ConsumerState<LocationSettings> createState() => _LocationSettingsState();
@@ -26,12 +32,18 @@ class _LocationSettingsState extends ConsumerState<LocationSettings> {
     final isSuccess = await viewModel.updateUserLocation(widget.user.userId);
 
     if (isSuccess && mounted) {
-      // 성공적으로 업데이트되면 홈 화면으로 이동
-      Navigator.pushNamedAndRemoveUntil(
+      ScaffoldMessenger.of(
         context,
-        '/main',
-        (route) => false, // 모든 이전 화면 제거
-      );
+      ).showSnackBar(const SnackBar(content: Text('위치 정보가 업데이트되었습니다!')));
+
+      // isFromHomePage 값에 따라 다른 동작 수행
+      if (widget.isFromHomePage) {
+        // 홈에서 왔다면, 이전 페이지(홈)로 돌아가기
+        Navigator.pop(context);
+      } else {
+        // 최초 설정 플로우라면, 메인 페이지로 이동
+        Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
+      }
     } else if (mounted) {
       final state = ref.read(locationViewModelProvider);
       if (state.errorMessage != null) {
@@ -77,9 +89,11 @@ class _LocationSettingsState extends ConsumerState<LocationSettings> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(locationViewModelProvider);
+    //홈에서 왔을 때와 아닐 때를 구분하는 변수
+    final bool isResettng = widget.isFromHomePage;
 
     return PopScope(
-      canPop: false,
+      canPop: isResettng, // 홈에서 왔으면 뒤로가기 허용
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         final shouldPop = await _onBackPressed(context);
@@ -88,7 +102,12 @@ class _LocationSettingsState extends ConsumerState<LocationSettings> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: Text('위치 설정'), centerTitle: true),
+        appBar: AppBar(
+          title: Text(isResettng ? '위치 재설정' : '위치 설정'),
+          centerTitle: true,
+          // 홈에서 온 것이 아니라면, 기본 뒤로가기 버튼을 숨겨 PopScope가 제어하도록 함
+          automaticallyImplyLeading: isResettng,
+        ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(32.0),
@@ -183,7 +202,7 @@ class _LocationSettingsState extends ConsumerState<LocationSettings> {
                 //시작하기 버튼
                 ElevatedButton(
                   onPressed: state.isButtonEnabled && !state.isLoading
-                      ? _onStartButtonPressed
+                      ? _onStartButtonPressed // 여기서 수정한 map 핀버튼 함수 연결됨
                       : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
@@ -204,7 +223,7 @@ class _LocationSettingsState extends ConsumerState<LocationSettings> {
                           ),
                         )
                       : Text(
-                          '시작하기',
+                          isResettng ? '저장하기' : '시작하기', // 버튼 텍스트 변경
                           style: TextStyle(
                             fontSize: 18,
                             color: AppTheme.textOnPrimary,

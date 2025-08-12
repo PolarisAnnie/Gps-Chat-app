@@ -5,6 +5,7 @@ import 'package:gps_chat_app/core/theme/theme.dart';
 import 'package:gps_chat_app/ui/pages/home/widgets/cafe_suggestion.dart';
 import 'package:gps_chat_app/ui/pages/home/widgets/current_location_bar.dart';
 import 'package:gps_chat_app/ui/pages/home/widgets/member_list.dart';
+import 'package:gps_chat_app/ui/pages/welcome/location_settings/location_settings.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -24,7 +25,24 @@ class HomePage extends ConsumerWidget {
               currentUserAsync.when(
                 data: (user) => CurrentLocationBar(
                   location: user?.address ?? '위치 정보를 불러오는 중...',
+                  // onPinTap에 페이지 이동 로직 구현
+                  onPinTap: () {
+                    // 현재 유저 정보가 있을 때만 페이지 이동
+                    if (user != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LocationSettings(
+                            user: user,
+                            // 이 페이지가 홈에서 왔다는 것을 알리는 플래그 전달
+                            isFromHomePage: true,
+                          ),
+                        ),
+                      );
+                    }
+                  },
                 ),
+
                 loading: () =>
                     const CurrentLocationBar(location: '위치 정보 로딩중...'),
                 error: (err, stack) =>
