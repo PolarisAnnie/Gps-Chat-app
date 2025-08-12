@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gps_chat_app/data/model/chat_room.dart';
+import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/ui/pages/chat/chat_page.dart';
 import 'package:gps_chat_app/ui/pages/chat_room_list/chat_room_list_view_model.dart';
 import 'package:gps_chat_app/ui/pages/chat_room_list/widgets/chat_room_item.dart';
@@ -11,6 +13,15 @@ class ChatRoomListPage extends ConsumerStatefulWidget {
 
 class _ChatRoomListPageState extends ConsumerState<ChatRoomListPage> {
   bool _initialized = false; // 중복 실행 방지
+
+  // 상대방 ID를 결정하는 메서드
+  String _getOtherUserId(ChatRoom chatRoom, User currentUser) {
+    if (currentUser.userId == chatRoom.currentUserId) {
+      return chatRoom.otherUserId; // 내가 시작한 채팅방
+    } else {
+      return chatRoom.currentUserId; // 상대방이 시작한 채팅방
+    }
+  }
 
   @override
   void initState() {
@@ -71,21 +82,26 @@ class _ChatRoomListPageState extends ConsumerState<ChatRoomListPage> {
                     children: [
                       GestureDetector(
                         onTap: () {
+                          final chatRoom = state.chatRooms[index];
+                          // 올바른 상대방 ID 계산
+                          final correctOtherUserId = _getOtherUserId(
+                            chatRoom,
+                            user!,
+                          );
+
                           print('채팅방 클릭');
                           print(
-                            '🟢 채팅방 클릭 - roomId:  ${state.chatRooms[index].roomId}',
+                            '🟢 채팅방 클릭 - roomId: ${state.chatRooms[index].roomId}',
                           );
-                          print(
-                            '🟢 otherUserId: ${state.chatRooms[index].otherUserId}',
-                          );
+                          print('🟢 올바른 otherUserId: $correctOtherUserId');
+
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) {
                                 return ChatPage(
                                   roomId: state.chatRooms[index].roomId,
-                                  otherUserId:
-                                      state.chatRooms[index].otherUserId,
+                                  otherUserId: correctOtherUserId, // 수정된 부분
                                 );
                               },
                             ),

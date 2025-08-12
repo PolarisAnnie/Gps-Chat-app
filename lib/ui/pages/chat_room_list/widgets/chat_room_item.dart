@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/data/model/chat_room.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
+import 'package:gps_chat_app/ui/pages/chat/chat_view_model.dart';
 import 'package:gps_chat_app/ui/pages/home/member_detail.dart';
 
 // otherUserId로 사용자 정보 조회
@@ -18,10 +19,25 @@ class ChatRoomItem extends ConsumerWidget {
 
   final ChatRoom chatRoom;
 
+  // 상대방 ID를 결정하는 메서드
+  String _getOtherUserId(WidgetRef ref) {
+    final currentUserAsync = ref.read(currentUserProvider);
+    final currentUser = currentUserAsync.asData?.value;
+
+    if (currentUser == null) return chatRoom.otherUserId;
+
+    // 현재 사용자 기준으로 상대방 결정
+    if (currentUser.userId == chatRoom.currentUserId) {
+      return chatRoom.otherUserId; // 내가 시작한 채팅방
+    } else {
+      return chatRoom.currentUserId; // 상대방이 시작한 채팅방
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 상대방 사용자 정보 조회
-    final otherUserAsync = ref.watch(otherUserProvider(chatRoom.otherUserId));
+    final otherUserAsync = ref.watch(otherUserProvider(_getOtherUserId(ref)));
     final otherUser = otherUserAsync.when(
       data: (user) => user,
       loading: () => null,
@@ -66,7 +82,7 @@ class ChatRoomItem extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              otherUser?.nickname ?? 'User ${chatRoom.otherUserId}', // 실제 닉네임
+              otherUser?.nickname ?? 'User ${_getOtherUserId(ref)}', // 실제 닉네임
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 1),
