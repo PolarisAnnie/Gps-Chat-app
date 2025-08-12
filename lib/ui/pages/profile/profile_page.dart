@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gps_chat_app/core/providers/viewmodels/nearby_users_provider.dart'
+    hide currentUserProvider;
 import 'package:gps_chat_app/core/theme/theme.dart';
+import 'package:gps_chat_app/ui/pages/chat/chat_view_model.dart';
 import 'package:gps_chat_app/ui/pages/profile/profile_view_model.dart';
 import 'package:gps_chat_app/ui/pages/profile/widgets/profile_card.dart';
 import 'package:gps_chat_app/ui/pages/profile/widgets/profile_edit_form.dart';
@@ -51,7 +54,7 @@ class ProfilePage extends ConsumerWidget {
         centerTitle: true,
         automaticallyImplyLeading: false,
       ),
-      body: _buildBody(context, profileState, profileViewModel),
+      body: _buildBody(context, profileState, profileViewModel, ref),
     );
   }
 
@@ -59,6 +62,7 @@ class ProfilePage extends ConsumerWidget {
     BuildContext context,
     ProfileState state,
     ProfileViewModel viewModel,
+    WidgetRef ref,
   ) {
     if (state.isLoading) {
       return const LoadingWidget();
@@ -84,7 +88,7 @@ class ProfilePage extends ConsumerWidget {
           if (!state.isEditing) ...[
             _buildEditButton(viewModel),
             const SizedBox(height: 16),
-            _buildLogoutButton(context, viewModel),
+            _buildLogoutButton(context, viewModel, ref),
           ] else ...[
             ProfileEditForm(
               initialNickname: state.user!.nickname,
@@ -132,12 +136,16 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildLogoutButton(BuildContext context, ProfileViewModel viewModel) {
+  Widget _buildLogoutButton(
+    BuildContext context,
+    ProfileViewModel viewModel,
+    WidgetRef ref,
+  ) {
     return SizedBox(
       width: double.infinity,
       height: 48,
       child: OutlinedButton(
-        onPressed: () => _showLogoutDialog(context, viewModel),
+        onPressed: () => _showLogoutDialog(context, viewModel, ref),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.red,
           side: const BorderSide(color: Colors.red),
@@ -155,7 +163,11 @@ class ProfilePage extends ConsumerWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context, ProfileViewModel viewModel) {
+  void _showLogoutDialog(
+    BuildContext context,
+    ProfileViewModel viewModel,
+    WidgetRef ref,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -196,6 +208,9 @@ class ProfilePage extends ConsumerWidget {
                     Navigator.of(context).pop();
                     final success = await viewModel.logout();
                     if (success && context.mounted) {
+                      ref.invalidate(currentUserProvider);
+                      ref.invalidate(nearbyUsersProvider);
+
                       _showSnackBar(context, '로그아웃되었습니다.');
                       // 단순히 signup 페이지로 이동
                       Navigator.of(

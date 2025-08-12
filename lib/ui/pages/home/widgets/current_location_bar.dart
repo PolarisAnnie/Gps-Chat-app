@@ -5,8 +5,7 @@ class CurrentLocationBar extends StatelessWidget {
   final String? location;
   final VoidCallback? onPinTap; //  탭 이벤트를 위한 콜백 함수 추가
 
-  const CurrentLocationBar({Key? key, this.location, this.onPinTap})
-    : super(key: key);
+  const CurrentLocationBar({super.key, this.location, this.onPinTap});
 
   @override
   Widget build(BuildContext context) {

@@ -145,15 +145,9 @@ class UserRepository {
 
   // 현재 로그인한 사용자의 전체 정보 가져오기
   Future<User?> getCurrentUser() async {
-    try {
-      final userId = await getCurrentUserId();
-      if (userId == null) return null;
-
-      return await getUserById(userId);
-    } catch (e) {
-      debugPrint('현재 사용자 정보 조회 실패: ${e.toString()}');
-      return null;
-    }
+    final userId = await getCurrentUserId();
+    if (userId == null) return null; // null 보장
+    return await getUserById(userId);
   }
 
   // 로그인 시 사용자 ID를 기기에 저장
@@ -173,6 +167,7 @@ class UserRepository {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString(_currentUserIdKey);
       debugPrint('저장된 사용자 ID: $userId');
+      if (userId == null || userId.isEmpty) return null;
       return userId;
     } catch (e) {
       debugPrint('사용자 ID 조회 실패: ${e.toString()}');
@@ -184,7 +179,9 @@ class UserRepository {
   Future<void> logout() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_currentUserIdKey);
+      await prefs.remove(_currentUserIdKey); // 저장된 ID 삭제
+      await prefs.remove('auth_token'); // 토큰 있으면 같이 삭제
+
       debugPrint('로그아웃 완료');
     } catch (e) {
       debugPrint('로그아웃 실패: ${e.toString()}');

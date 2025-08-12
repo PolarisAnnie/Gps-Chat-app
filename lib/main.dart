@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
       title: 'GPS Chat App',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const HomePage(),
+      home: const SplashPage(),
       routes: {
         '/splash': (context) => const SplashPage(),
         '/signup': (context) => SignupPage(),

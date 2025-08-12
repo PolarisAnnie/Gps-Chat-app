@@ -9,7 +9,7 @@ import 'package:gps_chat_app/ui/pages/home/widgets/member_list.dart';
 import 'package:gps_chat_app/ui/pages/welcome/location_settings/location_settings.dart';
 
 class HomePage extends ConsumerStatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   ConsumerState<HomePage> createState() => _HomePageState();
@@ -18,6 +18,7 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage>
     with WidgetsBindingObserver {
   bool _initialized = false;
+  String? _lastUserId; // 마지막 사용자 ID 추적
 
   @override
   void initState() {
@@ -28,6 +29,7 @@ class _HomePageState extends ConsumerState<HomePage>
       final currentUser = ref.read(currentUserProvider).value;
       if (currentUser != null && !_initialized) {
         _initialized = true;
+        _lastUserId = currentUser.userId;
         final vm = ref.read(chatRoomListViewModelProvider.notifier);
         vm.setUserContext(currentUser.userId, currentUser.address ?? '');
         vm.startChatRoomsStream();
@@ -42,20 +44,50 @@ class _HomePageState extends ConsumerState<HomePage>
     super.dispose();
   }
 
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   if (state == AppLifecycleState.resumed) {
+  //     final currentUser = ref.read(currentUserProvider).value;
+  //     if (currentUser != null) {
+  //       final vm = ref.read(chatRoomListViewModelProvider.notifier);
+  //       vm.setUserContext(currentUser.userId, currentUser.address ?? '');
+  //       vm.startChatRoomsStream(); // <-- 여기서 문제였음 ㅡㅡ
+  //       print('🟦 홈에서 채팅방 스트림 재시작');
+
+  //       // 앱이 다시 포커스될 때 사용자 정보와 주변 사용자 새로고침
+  //       ref.invalidate(currentUserProvider);
+  //       ref.invalidate(nearbyUsersProvider);
+  //     }
+  //   }
+  // }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       final currentUser = ref.read(currentUserProvider).value;
-      if (currentUser != null) {
-        final vm = ref.read(chatRoomListViewModelProvider.notifier);
-        vm.setUserContext(currentUser.userId, currentUser.address ?? '');
-        vm.startChatRoomsStream();
-        print('🟦 홈에서 채팅방 스트림 재시작');
 
-        // 앱이 다시 포커스될 때 사용자 정보와 주변 사용자 새로고침
-        ref.invalidate(currentUserProvider);
-        ref.invalidate(nearbyUsersProvider);
+      // ✅ user가 null이거나 userId가 빈 값이면 스트림 재시작 금지
+      if (currentUser == null || currentUser.userId.isEmpty) {
+        print('로그아웃 상태이므로 채팅방 스트림 재시작 안 함');
+        return;
       }
+
+      // ✅ 같은 유저라면 재시작 안 함
+      if (currentUser.userId == _lastUserId) {
+        print('동일 사용자이므로 채팅방 스트림 재시작 안 함');
+        return;
+      }
+
+      // ✅ 새로운 사용자일 때만 재시작
+      _lastUserId = currentUser.userId;
+      final vm = ref.read(chatRoomListViewModelProvider.notifier);
+      vm.setUserContext(currentUser.userId, currentUser.address ?? '');
+      vm.startChatRoomsStream();
+      print('🟦 홈에서 채팅방 스트림 재시작');
+
+      // // 필요 시 주변 사용자 새로고침
+      // ref.invalidate(currentUserProvider);
+      ref.invalidate(nearbyUsersProvider);
     }
   }
 
@@ -63,6 +95,24 @@ class _HomePageState extends ConsumerState<HomePage>
   Widget build(BuildContext context) {
     final currentUserAsync = ref.watch(currentUserProvider);
     final nearbyUsersAsync = ref.watch(nearbyUsersProvider);
+
+    // 사용자가 변경되었는지 확인하고 초기화 상태 리셋
+    currentUserAsync.whenData((user) {
+      if (user != null && user.userId != _lastUserId) {
+        _initialized = false;
+        _lastUserId = user.userId;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!_initialized) {
+            _initialized = true;
+            final vm = ref.read(chatRoomListViewModelProvider.notifier);
+            vm.setUserContext(user.userId, user.address ?? '');
+            vm.startChatRoomsStream();
+            print('🟦 새로운 사용자로 채팅방 스트림 시작: ${user.userId}');
+          }
+        });
+      }
+    });
 
     return Scaffold(
       body: SafeArea(

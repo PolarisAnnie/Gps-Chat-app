@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/core/providers/viewmodels/auth_viewmodel.dart';
 import 'package:gps_chat_app/core/providers/viewmodels/main_navigation_viewmodel.dart';
+import 'package:gps_chat_app/core/providers/viewmodels/nearby_users_provider.dart';
 import 'package:gps_chat_app/core/theme/theme.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
 
@@ -98,8 +99,15 @@ class _SignupPageState extends ConsumerState<SignupPage> {
             if (mounted && user != null) {
               // 로그인 성공 시 현재 사용자 ID 저장
               await UserRepository().setCurrentUserId(user.userId);
+              // 저장 후 잠시 대기
+              await Future.delayed(const Duration(milliseconds: 100));
               // 네비게이션 상태를 홈으로 설정
               ref.read(mainNavigationViewModelProvider.notifier).goToHome();
+              // 새로운 사용자 정보로 Provider들 새로고침
+              ref.invalidate(currentUserProvider);
+              ref.invalidate(nearbyUsersProvider);
+              // 추가 대기 후 메인으로 이동
+              await Future.delayed(const Duration(milliseconds: 100));
               Navigator.pushReplacementNamed(
                 context,
                 '/main',
