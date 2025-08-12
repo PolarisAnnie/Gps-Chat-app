@@ -92,10 +92,7 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: const Text(
-          '상세 소개',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-        ),
+        title: const Text('상세 소개'),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -103,24 +100,31 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
           children: [
             const SizedBox(height: 10),
             Center(
-              child: CircleAvatar(
-                radius: 40,
-                backgroundImage: NetworkImage(widget.user.imageUrl),
-                backgroundColor: Colors.grey.shade200,
-              ),
-            ),
-            const SizedBox(height: 23),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 22.0),
-              child: Center(
-                // 닉네임
-                child: Text(
-                  widget.user.nickname,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Container(
+                  width: double.infinity,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(16),
+                    image: DecorationImage(
+                      image: NetworkImage(widget.user.imageUrl),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 22.0),
+              child: Text(
+                widget.user.nickname,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+              ),
+            ),
+            const SizedBox(height: 12),
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
@@ -137,7 +141,8 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
             ),
             const SizedBox(height: 20),
 
-            Center(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: GestureDetector(
                 onTap: _isLoading ? null : _startChat,
 
@@ -146,7 +151,7 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
                   height: 50,
                   decoration: BoxDecoration(
                     color: AppTheme.primaryColor,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                   ),
 
                   child: Center(
@@ -155,7 +160,7 @@ class _MemberDetailPageState extends ConsumerState<MemberDetailPage> {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
