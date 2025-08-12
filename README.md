@@ -3,6 +3,9 @@
 
 개발자 커뮤니티 또는 개인과 연결되고 싶은 개발자들을 위한 지역 기반 매칭 앱입니다.
 
+<img width="2301" height="1997" alt="Group 201" src="https://github.com/user-attachments/assets/926e1911-cfbc-4c37-87a1-f4f201492f77" />
+
+
 ---
 
 ## 📱 프로젝트 개요
