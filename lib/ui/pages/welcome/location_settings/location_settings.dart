@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/core/theme/theme.dart';
 import 'package:gps_chat_app/core/providers/viewmodels/location_viewmodel.dart';
+import 'package:gps_chat_app/core/providers/viewmodels/nearby_users_provider.dart';
+import 'package:gps_chat_app/core/providers/viewmodels/main_navigation_viewmodel.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 
 class LocationSettings extends ConsumerStatefulWidget {
@@ -32,6 +34,10 @@ class _LocationSettingsState extends ConsumerState<LocationSettings> {
     final isSuccess = await viewModel.updateUserLocation(widget.user.userId);
 
     if (isSuccess && mounted) {
+      // 위치 업데이트 후 관련 Provider들 무효화하여 새로운 데이터 로드
+      ref.invalidate(currentUserProvider);
+      ref.invalidate(nearbyUsersProvider);
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('위치 정보가 업데이트되었습니다!')));
@@ -41,7 +47,8 @@ class _LocationSettingsState extends ConsumerState<LocationSettings> {
         // 홈에서 왔다면, 이전 페이지(홈)로 돌아가기
         Navigator.pop(context);
       } else {
-        // 최초 설정 플로우라면, 메인 페이지로 이동
+        // 최초 설정 플로우라면, 메인 페이지로 이동 (홈 탭으로 설정)
+        ref.read(mainNavigationViewModelProvider.notifier).goToHome();
         Navigator.pushNamedAndRemoveUntil(context, '/main', (route) => false);
       }
     } else if (mounted) {

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/core/providers/viewmodels/auth_viewmodel.dart';
+import 'package:gps_chat_app/core/providers/viewmodels/main_navigation_viewmodel.dart';
 import 'package:gps_chat_app/core/theme/theme.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
 
@@ -18,6 +19,10 @@ class _SignupPageState extends ConsumerState<SignupPage> {
   @override
   void initState() {
     super.initState();
+    // 텍스트 컨트롤러 초기화만
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _nicknameController.clear();
+    });
     _nicknameController.addListener(_validateNickname);
   }
 
@@ -93,6 +98,8 @@ class _SignupPageState extends ConsumerState<SignupPage> {
             if (mounted && user != null) {
               // 로그인 성공 시 현재 사용자 ID 저장
               await UserRepository().setCurrentUserId(user.userId);
+              // 네비게이션 상태를 홈으로 설정
+              ref.read(mainNavigationViewModelProvider.notifier).goToHome();
               Navigator.pushReplacementNamed(
                 context,
                 '/main',

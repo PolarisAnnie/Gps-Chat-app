@@ -49,9 +49,8 @@ class ProfileViewModel extends StateNotifier<ProfileState> {
   final StorageRepository _storageRepository;
 
   ProfileViewModel(this._userRepository, this._storageRepository)
-    : super(const ProfileState()) {
-    loadUserData();
-  }
+    : super(const ProfileState());
+  // 자동 로드 제거 - 페이지에서 명시적으로 호출하도록 변경
 
   Future<void> loadUserData() async {
     state = state.copyWith(isLoading: true, error: null);
@@ -63,11 +62,8 @@ class ProfileViewModel extends StateNotifier<ProfileState> {
       if (userData != null) {
         state = state.copyWith(user: userData, isLoading: false);
       } else {
-        // 로그인된 사용자가 없는 경우 에러 처리
-        state = state.copyWith(
-          isLoading: false,
-          error: '로그인된 사용자를 찾을 수 없습니다. 다시 로그인해주세요.',
-        );
+        // 로그인된 사용자가 없는 경우 조용히 처리 (에러 메시지 없이)
+        state = state.copyWith(isLoading: false, user: null);
       }
     } catch (e) {
       debugPrint('사용자 데이터 로드 실패: $e');
@@ -246,7 +242,14 @@ class ProfileViewModel extends StateNotifier<ProfileState> {
     try {
       await _userRepository.logout();
       // 상태를 완전히 초기화 (user를 null로 설정)
-      state = const ProfileState(user: null, isLoading: false);
+      state = const ProfileState(
+        user: null,
+        isLoading: false,
+        isEditing: false,
+        isSaving: false,
+        error: null,
+        nicknameError: null,
+      );
       return true;
     } catch (e) {
       debugPrint('로그아웃 실패: $e');

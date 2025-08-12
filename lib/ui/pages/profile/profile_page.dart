@@ -159,64 +159,68 @@ class ProfilePage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Text(
-            '로그아웃',
-            style: TextStyle(
-              fontFamily: 'Paperlogy',
-              fontWeight: FontWeight.w600,
-              color: AppTheme.textPrimary,
-            ),
-          ),
-          content: const Text(
-            '정말로 로그아웃하시겠습니까?',
-            style: TextStyle(
-              fontFamily: 'Paperlogy',
-              color: AppTheme.textSecondary,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                '취소',
+        return Consumer(
+          builder: (context, ref, child) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: const Text(
+                '로그아웃',
+                style: TextStyle(
+                  fontFamily: 'Paperlogy',
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.textPrimary,
+                ),
+              ),
+              content: const Text(
+                '정말로 로그아웃하시겠습니까?',
                 style: TextStyle(
                   fontFamily: 'Paperlogy',
                   color: AppTheme.textSecondary,
                 ),
               ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                final success = await viewModel.logout();
-                if (success && context.mounted) {
-                  _showSnackBar(context, '로그아웃되었습니다.');
-                  // 로그인 페이지로 이동
-                  Navigator.of(
-                    context,
-                  ).pushNamedAndRemoveUntil('/signup', (route) => false);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text(
+                    '취소',
+                    style: TextStyle(
+                      fontFamily: 'Paperlogy',
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
                 ),
-              ),
-              child: const Text(
-                '로그아웃',
-                style: TextStyle(
-                  fontFamily: 'Paperlogy',
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                    final success = await viewModel.logout();
+                    if (success && context.mounted) {
+                      _showSnackBar(context, '로그아웃되었습니다.');
+                      // 단순히 signup 페이지로 이동
+                      Navigator.of(
+                        context,
+                      ).pushNamedAndRemoveUntil('/signup', (route) => false);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    '로그아웃',
+                    style: TextStyle(
+                      fontFamily: 'Paperlogy',
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         );
       },
     );
@@ -288,26 +292,31 @@ class ProfilePage extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(
-                        context,
-                      ).pushNamedAndRemoveUntil('/signup', (route) => false);
+                  child: Consumer(
+                    builder: (context, ref, child) {
+                      return ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            '/signup',
+                            (route) => false,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const Text(
+                          '로그인하기',
+                          style: TextStyle(
+                            fontFamily: 'Paperlogy',
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text(
-                      '로그인하기',
-                      style: TextStyle(
-                        fontFamily: 'Paperlogy',
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
                   ),
                 ),
               ],
