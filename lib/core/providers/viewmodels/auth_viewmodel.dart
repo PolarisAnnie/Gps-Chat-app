@@ -53,11 +53,6 @@ class AuthViewModel extends StateNotifier<AuthState> {
   void setLoading(bool loading) {
     state = state.copyWith(isLoading: loading);
   }
-
-  /// 상태 초기화
-  void resetState() {
-    state = const AuthState();
-  }
 }
 
 final authViewModelProvider = StateNotifierProvider<AuthViewModel, AuthState>((

@@ -6,7 +6,6 @@ import 'package:gps_chat_app/ui/pages/chat_room_list/chat_room_list_view_model.d
 import 'package:gps_chat_app/ui/pages/home/widgets/cafe_suggestion.dart';
 import 'package:gps_chat_app/ui/pages/home/widgets/current_location_bar.dart';
 import 'package:gps_chat_app/ui/pages/home/widgets/member_list.dart';
-import 'package:gps_chat_app/ui/pages/welcome/location_settings/location_settings.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -51,10 +50,6 @@ class _HomePageState extends ConsumerState<HomePage>
         vm.setUserContext(currentUser.userId, currentUser.address ?? '');
         vm.startChatRoomsStream();
         print('🟦 홈에서 채팅방 스트림 재시작');
-
-        // 앱이 다시 포커스될 때 사용자 정보와 주변 사용자 새로고침
-        ref.invalidate(currentUserProvider);
-        ref.invalidate(nearbyUsersProvider);
       }
     }
   }
@@ -70,37 +65,9 @@ class _HomePageState extends ConsumerState<HomePage>
           child: Column(
             children: [
               currentUserAsync.when(
-                data: (user) {
-                  String locationText;
-                  if (user == null) {
-                    locationText = '로그인이 필요합니다';
-                  } else if (user.address == null || user.address!.isEmpty) {
-                    locationText = '위치 설정이 필요합니다';
-                  } else {
-                    locationText = user.address!;
-                  }
-
-                  return CurrentLocationBar(
-                    location: locationText,
-                    // onPinTap에 페이지 이동 로직 구현
-                    onPinTap: () {
-                      // 현재 유저 정보가 있을 때만 페이지 이동
-                      if (user != null) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => LocationSettings(
-                              user: user,
-                              // 이 페이지가 홈에서 왔다는 것을 알리는 플래그 전달
-                              isFromHomePage: true,
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                  );
-                },
-
+                data: (user) => CurrentLocationBar(
+                  location: user?.address ?? '위치 정보를 불러오는 중...',
+                ),
                 loading: () =>
                     const CurrentLocationBar(location: '위치 정보 로딩중...'),
                 error: (err, stack) =>

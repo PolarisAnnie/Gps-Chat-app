@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:gps_chat_app/core/theme/theme.dart';
 
 class CurrentLocationBar extends StatelessWidget {
-  final String? location;
-  final VoidCallback? onPinTap; //  탭 이벤트를 위한 콜백 함수 추가
+  final String? location; // 위치 텍스트 (선택적)
 
-  const CurrentLocationBar({Key? key, this.location, this.onPinTap})
-    : super(key: key);
+  const CurrentLocationBar({Key? key, this.location}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -58,13 +56,10 @@ class CurrentLocationBar extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: onPinTap, // 콜백 함수 연결함
-                  child: Image.asset(
-                    'assets/images/pin_white.png',
-                    width: 30,
-                    height: 30,
-                  ),
+                Image.asset(
+                  'assets/images/pin_white.png',
+                  width: 30,
+                  height: 30,
                 ),
               ],
             ),
