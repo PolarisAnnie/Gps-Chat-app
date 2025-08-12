@@ -17,11 +17,9 @@ class _ChatRoomListPageState extends ConsumerState<ChatRoomListPage>
   bool _initialized = false;
 
   String _getOtherUserId(ChatRoom chatRoom, User currentUser) {
-    if (currentUser.userId == chatRoom.currentUserId) {
-      return chatRoom.otherUserId;
-    } else {
-      return chatRoom.currentUserId;
-    }
+    return currentUser.userId == chatRoom.currentUserId
+        ? chatRoom.otherUserId
+        : chatRoom.currentUserId;
   }
 
   @override
@@ -36,23 +34,11 @@ class _ChatRoomListPageState extends ConsumerState<ChatRoomListPage>
     super.dispose();
   }
 
-  // 앱 복귀 시 채팅방 리스트 강제 갱신
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      _restartChatRoomsStream();
-    }
-  }
-
-  void _restartChatRoomsStream() {
-    final vm = ref.read(chatRoomListViewModelProvider.notifier);
-    final currentUser = ref.read(currentUserProvider).value;
-    if (currentUser != null) {
-      vm.refreshChatRooms(
-        userId: currentUser.userId,
-        address: currentUser.address ?? '',
-      );
-      print('🟦 채팅방 리스트 스트림 재시작');
+      print('🔄 앱 복귀 - 채팅방 스트림 재시작 시도');
+      ref.read(chatRoomListViewModelProvider.notifier).startChatRoomsStream();
     }
   }
 
@@ -75,22 +61,11 @@ class _ChatRoomListPageState extends ConsumerState<ChatRoomListPage>
         if (user != null && !_initialized) {
           _initialized = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref
-                .read(chatRoomListViewModelProvider.notifier)
-                .refreshChatRooms(
-                  userId: user.userId,
-                  address: user.address ?? '',
-                );
-            print('🟦 초기화 완료');
+            final vm = ref.read(chatRoomListViewModelProvider.notifier);
+            vm.setUserContext(user.userId, user.address ?? '');
+            vm.startChatRoomsStream(); // 1번만 실행
           });
         }
-
-        // 채팅탭 재진입 시 스트림 재시작
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (ModalRoute.of(context)?.isCurrent ?? false) {
-            _restartChatRoomsStream();
-          }
-        });
 
         return Scaffold(
           appBar: AppBar(
@@ -105,56 +80,48 @@ class _ChatRoomListPageState extends ConsumerState<ChatRoomListPage>
           ),
           body: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: state.isLoading
-                ? Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    padding: EdgeInsets.symmetric(vertical: 24),
-                    itemCount: state.chatRooms.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Column(
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                final chatRoom = state.chatRooms[index];
-                                final correctOtherUserId = _getOtherUserId(
-                                  chatRoom,
-                                  user!,
-                                );
+            child: ListView.builder(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              itemCount: state.chatRooms.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          final chatRoom = state.chatRooms[index];
+                          final correctOtherUserId = _getOtherUserId(
+                            chatRoom,
+                            user!,
+                          );
 
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) {
-                                      return ChatPage(
-                                        roomId: chatRoom.roomId,
-                                        otherUserId: correctOtherUserId,
-                                      );
-                                    },
-                                  ),
-                                ).then((_) {
-                                  _restartChatRoomsStream();
-                                });
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return ChatPage(
+                                  roomId: chatRoom.roomId,
+                                  otherUserId: correctOtherUserId,
+                                );
                               },
-                              child: ChatRoomItem(
-                                chatRoom: state.chatRooms[index],
-                              ),
                             ),
-                            SizedBox(height: 12),
-                            if (index < state.chatRooms.length - 1)
-                              Container(
-                                height: 0.3,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: Color(0xffC7C7C7),
-                                ),
-                              ),
-                          ],
+                          );
+                        },
+                        child: ChatRoomItem(chatRoom: state.chatRooms[index]),
+                      ),
+                      SizedBox(height: 12),
+                      if (index < state.chatRooms.length - 1)
+                        Container(
+                          height: 0.3,
+                          width: double.infinity,
+                          color: Color(0xffC7C7C7),
                         ),
-                      );
-                    },
+                    ],
                   ),
+                );
+              },
+            ),
           ),
         );
       },

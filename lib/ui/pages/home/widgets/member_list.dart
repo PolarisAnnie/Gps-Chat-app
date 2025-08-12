@@ -19,8 +19,6 @@ class MemberList extends ConsumerStatefulWidget {
 
 class _MemberListState extends ConsumerState<MemberList>
     with WidgetsBindingObserver {
-  // 라이프사이클 감시 추가
-
   PageController _pageController = PageController();
   final ChatRoomRepository _chatRoomRepository = ChatRoomRepository();
 
@@ -28,6 +26,11 @@ class _MemberListState extends ConsumerState<MemberList>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    // 최초 진입 시 한 번만 새로고침
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshMembers();
+    });
   }
 
   @override
@@ -37,7 +40,7 @@ class _MemberListState extends ConsumerState<MemberList>
     super.dispose();
   }
 
-  // 앱 복귀 시 멤버 새로고침
+  // 앱 복귀 시 새로고침
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -66,10 +69,11 @@ class _MemberListState extends ConsumerState<MemberList>
   Future<void> _startChat(User otherUser) async {
     final currentUser = await ref.read(currentUserProvider.future);
     if (currentUser == null) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('사용자 정보를 불러올 수 없습니다.')));
+      }
       return;
     }
 
@@ -100,27 +104,21 @@ class _MemberListState extends ConsumerState<MemberList>
         );
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('오류가 발생했습니다: $e')));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // ✅ 변경: 홈 탭 재진입 시 새로고침
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (ModalRoute.of(context)?.isCurrent ?? false) {
-        _refreshMembers();
-      }
-    });
-
     if (widget.members.isEmpty) {
       return Container(
         width: double.infinity,
         height: 100,
-        margin: EdgeInsets.symmetric(horizontal: 16),
+        margin: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
           color: Colors.grey.shade200,
           borderRadius: BorderRadius.circular(12),
@@ -231,7 +229,7 @@ class _MemberListState extends ConsumerState<MemberList>
             },
           ),
         ),
-        SizedBox(height: 12),
+        const SizedBox(height: 12),
         SmoothPageIndicator(
           controller: _pageController,
           count: memberGroups.length,
