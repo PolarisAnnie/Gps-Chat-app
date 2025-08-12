@@ -30,17 +30,31 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   @override
   void initState() {
     super.initState();
-    // 실시간 메시지 스트림 시작
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(chatPageViewModelProvider(widget.roomId).notifier)
-          .startMessageStream();
+    print('🔴 ChatPage initState 시작 - roomId: ${widget.roomId}');
+
+    Future.microtask(() async {
+      try {
+        // 직접 UserRepository 사용
+        final user = await UserRepository().getCurrentUser();
+        if (user != null && mounted) {
+          print('🔴 사용자 정보 로딩 완료: ${user.nickname}');
+          final viewModel = ref.read(
+            chatPageViewModelProvider(widget.roomId).notifier,
+          );
+          viewModel.setCurrentUser(user);
+          viewModel.startMessageStream();
+          print('🔴 startMessageStream 호출 완료');
+        }
+      } catch (e) {
+        print('🔴 사용자 정보 로딩 실패: $e');
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(chatPageViewModelProvider(widget.roomId));
+    print('🔴 ChatPage build - 메시지 수: ${state.messages.length}');
     final viewModel = ref.read(
       chatPageViewModelProvider(widget.roomId).notifier,
     );
@@ -53,13 +67,8 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       error: (_, __) => null,
     );
 
-    // 현재 사용자 정보 조회
-    final currentUserAsync = ref.watch(currentUserProvider);
-    final currentUser = currentUserAsync.when(
-      data: (user) => user,
-      loading: () => null,
-      error: (_, __) => null,
-    );
+    //ViewModel에서 현재 사용자 정보 가져오기
+    final currentUser = viewModel.getCurrentUser();
 
     return Scaffold(
       appBar: AppBar(

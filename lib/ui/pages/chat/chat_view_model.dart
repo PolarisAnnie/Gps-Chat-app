@@ -44,7 +44,7 @@ final currentUserProvider = FutureProvider<User?>((ref) async {
 class ChatPageViewModel extends StateNotifier<ChatPageState> {
   final ChatMessageRepository _messageRepository;
   final String roomId;
-  final User? _currentUser;
+  User? _currentUser;
   final ChatRoomRepository _roomRepository; // 소린 추가: 채팅방 관리
 
   ChatPageViewModel({
@@ -57,16 +57,40 @@ class ChatPageViewModel extends StateNotifier<ChatPageState> {
        _currentUser = currentUser,
        super(ChatPageState());
 
+  // 사용자 정보 설정 메서드 추가
+  void setCurrentUser(User? user) {
+    _currentUser = user;
+    print('🟡 사용자 정보 설정: ${user?.nickname}');
+  }
+
+  // 현재 사용자 정보 반환 메서드 추가
+  User? getCurrentUser() {
+    return _currentUser;
+  }
+
   // 현재 사용자 정보 getter들 추가
   String get currentUserId => _currentUser?.userId ?? "";
   String get currentUserName => _currentUser?.nickname ?? "";
   String get currentAddress => _currentUser?.address ?? "";
 
   // 실시간 메시지 받기 시작
-  void startMessageStream() {
-    _messageRepository.getMessageStream(roomId).listen((messages) {
-      state = state.copyWith(messages: messages);
-    });
+  void startMessageStream() async {
+    print('🟡 startMessageStream 호출됨 - roomId: $roomId');
+
+    try {
+      // 1. 먼저 기존 메시지들 로딩
+      final initialMessages = await _messageRepository.getMessages(roomId);
+      state = state.copyWith(messages: initialMessages);
+      print('🟡 초기 메시지 로딩: ${initialMessages.length}개');
+
+      // 2. 그 다음 실시간 스트림 시작
+      _messageRepository.getMessageStream(roomId).listen((messages) {
+        print('🟡 스트림 메시지 수신: ${messages.length}개');
+        state = state.copyWith(messages: messages);
+      });
+    } catch (e) {
+      print('🔴 메시지 로딩 에러: $e');
+    }
   }
 
   // 입력 텍스트 변경
@@ -124,13 +148,9 @@ final chatPageViewModelProvider =
       ref,
       roomId,
     ) {
-      // 사용자 정보 가져오기 추가
-      final currentUserAsync = ref.watch(currentUserProvider);
-      final currentUser = currentUserAsync.asData?.value;
-
       return ChatPageViewModel(
         roomId: roomId,
-        currentUser: currentUser,
+        currentUser: null, // 나중에 설정
         messageRepository: ref.read(chatMessageRepositoryProvider),
         roomRepository: ref.read(chatRoomRepositoryProvider), // 소린 추가: 의존성 추가
       );

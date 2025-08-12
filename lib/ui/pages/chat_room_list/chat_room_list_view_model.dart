@@ -47,7 +47,14 @@ class ChatRoomListViewModel extends StateNotifier<ChatRoomListState> {
 
   // 채팅방 목록 불러오기 (탭 진입 시 호출)
   Future<void> loadChatRooms() async {
+    // 사용자 정보가 없으면 실행하지 않음
+    if (currentUserId.isEmpty || currentAddress.isEmpty) {
+      print('🔴 사용자 정보 없음 - userId: $currentUserId, address: $currentAddress');
+      return;
+    }
+
     state = state.copyWith(isLoading: true);
+    print('🟢 채팅방 조회 시작 - userId: $currentUserId, address: $currentAddress');
 
     try {
       final chatRooms = await _repository.getChatRoomsByLocation(
