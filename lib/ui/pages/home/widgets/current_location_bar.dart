@@ -4,7 +4,7 @@ import 'package:gps_chat_app/core/theme/theme.dart';
 class CurrentLocationBar extends StatelessWidget {
   final String? location; // 위치 텍스트 (선택적)
 
-  const CurrentLocationBar({Key? key, this.location}) : super(key: key);
+  const CurrentLocationBar({super.key, this.location});
 
   @override
   Widget build(BuildContext context) {

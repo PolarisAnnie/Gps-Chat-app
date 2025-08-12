@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
 
 class ChatReceiveItem extends StatelessWidget {
-  ChatReceiveItem({
+  const ChatReceiveItem({
+    super.key,
     required this.imageUrl,
     required this.nickname,
     required this.content,

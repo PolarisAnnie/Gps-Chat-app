@@ -19,7 +19,7 @@ class ChatPage extends ConsumerStatefulWidget {
   final String roomId;
   final String otherUserId;
 
-  ChatPage({required this.roomId, required this.otherUserId});
+  const ChatPage({super.key, required this.roomId, required this.otherUserId});
 
   @override
   ConsumerState<ChatPage> createState() => _ChatPageState();

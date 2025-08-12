@@ -12,14 +12,14 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart'; // ✨ 1. 패
 class MemberList extends ConsumerStatefulWidget {
   final List<User> members; // 데이터를 외부에서 받도록 수정
 
-  const MemberList({Key? key, required this.members}) : super(key: key);
+  const MemberList({super.key, required this.members});
 
   @override
   ConsumerState<MemberList> createState() => _MemberListState();
 }
 
 class _MemberListState extends ConsumerState<MemberList> {
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   final ChatRoomRepository _chatRoomRepository =
       ChatRoomRepository(); // Repository 인스턴스 생성
 
@@ -58,10 +58,11 @@ class _MemberListState extends ConsumerState<MemberList> {
   Future<void> _startChat(User otherUser) async {
     final currentUser = await ref.read(currentUserProvider.future);
     if (currentUser == null) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('사용자 정보를 불러올 수 없습니다.')));
+      }
       return;
     }
 
@@ -92,10 +93,11 @@ class _MemberListState extends ConsumerState<MemberList> {
         );
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('오류가 발생했습니다: $e')));
+      }
     }
   }
 

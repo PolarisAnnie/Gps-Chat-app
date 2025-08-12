@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gps_chat_app/ui/pages/home/widgets/naver_search_api.dart';
 
 class CafeSuggestion extends StatefulWidget {
+  const CafeSuggestion({super.key});
+
   @override
   State<CafeSuggestion> createState() => _CafeSuggestionState();
 }

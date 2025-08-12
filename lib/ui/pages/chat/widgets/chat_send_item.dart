@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
 
 class ChatSendItem extends StatelessWidget {
-  ChatSendItem({
+  const ChatSendItem({
+    super.key,
     required this.imageUrl,
     required this.nickname,
     required this.content,
@@ -51,7 +52,7 @@ class ChatSendItem extends StatelessWidget {
           ),
         ),
         SizedBox(width: 8),
-        Container(
+        SizedBox(
           height: 32,
           width: 32,
           //decoration: BoxDecoration(shape: BoxShape.circle),

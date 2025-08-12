@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/ui/pages/chat/chat_view_model.dart';
 
 class ChatBottomSheet extends ConsumerStatefulWidget {
-  ChatBottomSheet(this.bottomPadding, this.roomId);
+  const ChatBottomSheet(this.bottomPadding, this.roomId, {super.key});
 
   final double bottomPadding;
   final String roomId;
