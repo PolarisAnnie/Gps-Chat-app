@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/data/model/chat_room.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
+import 'package:gps_chat_app/ui/pages/home/member_detail.dart';
 
 // otherUserId로 사용자 정보 조회
 final otherUserProvider = FutureProvider.family<User?, String>((
@@ -36,13 +37,20 @@ class ChatRoomItem extends ConsumerWidget {
           child: GestureDetector(
             onTap: () {
               print('프로필 이미지 클릭');
-              // TODO: MemberDetailPage 완성 후 네비게이션 연결
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => MemberDetailPage(userId: chatRoom.otherUserId),
-              //   ),
-              // );
+              // otherUser가 로딩 완료되었는지 확인 후 이동
+              if (otherUser != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MemberDetailPage(user: otherUser),
+                  ),
+                );
+              } else {
+                // 아직 로딩 중이거나 에러인 경우
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('사용자 정보를 불러오는 중입니다...')));
+              }
             },
             child: ClipOval(
               child: Image.network(
