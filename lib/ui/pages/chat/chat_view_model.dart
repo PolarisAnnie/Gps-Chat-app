@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
@@ -31,7 +32,6 @@ class ChatPageState {
   }
 }
 
-// Repository 제공
 final chatMessageRepositoryProvider = Provider<ChatMessageRepository>((ref) {
   return ChatMessageRepository();
 });
@@ -40,51 +40,45 @@ final currentUserProvider = FutureProvider<User?>((ref) async {
   return await UserRepository().getCurrentUser();
 });
 
-// 채팅 페이지 비즈니스 로직
 class ChatPageViewModel extends StateNotifier<ChatPageState> {
   final ChatMessageRepository _messageRepository;
   final String roomId;
+  final ChatRoomRepository _roomRepository;
   User? _currentUser;
-  final ChatRoomRepository _roomRepository; // 소린 추가: 채팅방 관리
+  StreamSubscription? _subscription; // ✅ 변경: 구독 관리
 
   ChatPageViewModel({
     required this.roomId,
     required User? currentUser,
     required ChatMessageRepository messageRepository,
-    required ChatRoomRepository roomRepository, // 소린 추가: 생성자에 추가
+    required ChatRoomRepository roomRepository,
   }) : _messageRepository = messageRepository,
-       _roomRepository = roomRepository, // 소린 추가: 필드 초기화
+       _roomRepository = roomRepository,
        _currentUser = currentUser,
        super(ChatPageState());
 
-  // 사용자 정보 설정 메서드 추가
   void setCurrentUser(User? user) {
     _currentUser = user;
     print('🟡 사용자 정보 설정: ${user?.nickname}');
   }
 
-  // 현재 사용자 정보 반환 메서드 추가
-  User? getCurrentUser() {
-    return _currentUser;
-  }
-
-  // 현재 사용자 정보 getter들 추가
+  User? getCurrentUser() => _currentUser;
   String get currentUserId => _currentUser?.userId ?? "";
   String get currentUserName => _currentUser?.nickname ?? "";
   String get currentAddress => _currentUser?.address ?? "";
 
-  // 실시간 메시지 받기 시작
+  // 메시지 스트림 시작
   void startMessageStream() async {
     print('🟡 startMessageStream 호출됨 - roomId: $roomId');
+    _subscription?.cancel(); // 기존 구독 해제
 
     try {
-      // 1. 먼저 기존 메시지들 로딩
       final initialMessages = await _messageRepository.getMessages(roomId);
       state = state.copyWith(messages: initialMessages);
-      print('🟡 초기 메시지 로딩: ${initialMessages.length}개');
 
-      // 2. 그 다음 실시간 스트림 시작
-      _messageRepository.getMessageStream(roomId).listen((messages) {
+      _subscription = _messageRepository.getMessageStream(roomId).listen((
+        messages,
+      ) {
         print('🟡 스트림 메시지 수신: ${messages.length}개');
         state = state.copyWith(messages: messages);
       });
@@ -93,19 +87,22 @@ class ChatPageViewModel extends StateNotifier<ChatPageState> {
     }
   }
 
-  // 입력 텍스트 변경
+  // 메시지 스트림 종료
+  void stopMessageStream() {
+    _subscription?.cancel();
+    _subscription = null;
+  }
+
   void onTextChanged(String text) {
     state = state.copyWith(newMessageText: text);
   }
 
-  // 메시지 전송
   Future<void> sendMessage() async {
     if (state.newMessageText.trim().isEmpty) return;
 
     state = state.copyWith(isSending: true);
 
     try {
-      // 메시지 생성
       final message = ChatMessage(
         sender: currentUserName,
         senderId: currentUserId,
@@ -114,44 +111,35 @@ class ChatPageViewModel extends StateNotifier<ChatPageState> {
         createdAt: DateTime.now(),
       );
 
-      // 메시지 전송
       await _messageRepository.sendMessage(roomId: roomId, message: message);
-
-      // 채팅방 겉에 last message 업데이트
       await _roomRepository.updateLastMessage(
         roomId: roomId,
         lastMessage: message,
       );
 
-      // 입력창 초기화
       state = state.copyWith(newMessageText: '', isSending: false);
     } catch (e) {
-      // 전송 실패 시 상태만 복구
       state = state.copyWith(isSending: false);
     }
   }
 
-  // 전송 버튼 클릭
-  void onSendPressed() {
-    sendMessage();
-  }
+  void onSendPressed() => sendMessage();
 
-  // 내가 보낸 메시지인지 확인
   bool isMyMessage(ChatMessage message) {
     return message.isSentByMe(currentUserId);
   }
 }
 
-// ViewModel 제공 (채팅방 ID별로 생성)
 final chatPageViewModelProvider =
     StateNotifierProvider.family<ChatPageViewModel, ChatPageState, String>((
       ref,
       roomId,
     ) {
+      final currentUser = ref.watch(currentUserProvider).value;
       return ChatPageViewModel(
         roomId: roomId,
-        currentUser: null, // 나중에 설정
+        currentUser: currentUser,
         messageRepository: ref.read(chatMessageRepositoryProvider),
-        roomRepository: ref.read(chatRoomRepositoryProvider), // 소린 추가: 의존성 추가
+        roomRepository: ref.read(chatRoomRepositoryProvider),
       );
     });

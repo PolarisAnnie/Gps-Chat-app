@@ -32,9 +32,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
     super.initState();
     print('🔴 ChatPage initState 시작 - roomId: ${widget.roomId}');
 
+    // ✅ 변경: 채팅방 진입 시 메시지 스트림 시작
     Future.microtask(() async {
       try {
-        // 직접 UserRepository 사용
         final user = await UserRepository().getCurrentUser();
         if (user != null && mounted) {
           print('🔴 사용자 정보 로딩 완료: ${user.nickname}');
@@ -42,13 +42,22 @@ class _ChatPageState extends ConsumerState<ChatPage> {
             chatPageViewModelProvider(widget.roomId).notifier,
           );
           viewModel.setCurrentUser(user);
-          viewModel.startMessageStream();
+          viewModel.startMessageStream(); // ✅ 실시간 메시지 스트림 시작
           print('🔴 startMessageStream 호출 완료');
         }
       } catch (e) {
         print('🔴 사용자 정보 로딩 실패: $e');
       }
     });
+  }
+
+  @override
+  void dispose() {
+    // 채팅방 나갈 때 메시지 스트림 정리
+    ref
+        .read(chatPageViewModelProvider(widget.roomId).notifier)
+        .stopMessageStream();
+    super.dispose();
   }
 
   @override
@@ -67,7 +76,7 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       error: (_, __) => null,
     );
 
-    //ViewModel에서 현재 사용자 정보 가져오기
+    // 현재 사용자
     final currentUser = viewModel.getCurrentUser();
 
     return Scaffold(
@@ -76,13 +85,9 @@ class _ChatPageState extends ConsumerState<ChatPage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            // 현재 스택에 뭐가 있든 상관없이 메인으로 가서 채팅 탭으로 설정
-            Navigator.of(context).pushNamedAndRemoveUntil(
-              '/main',
-              (route) => false, // 모든 스택 제거하고 메인만 남김
-            );
-
-            // 메인 페이지로 이동 후 채팅 탭(index 1)으로 설정
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil('/main', (route) => false);
             WidgetsBinding.instance.addPostFrameCallback((_) {
               final navigationViewModel = ref.read(
                 mainNavigationViewModelProvider.notifier,
@@ -105,13 +110,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 SizedBox(height: index == 0 ? 10 : 14),
                 isMyMessage
                     ? ChatSendItem(
-                        imageUrl: currentUser?.imageUrl ?? '', // null 안전 처리
+                        imageUrl: currentUser?.imageUrl ?? '',
                         nickname: currentUser?.nickname ?? 'Me',
                         content: message.content,
                         message: message,
                       )
                     : ChatReceiveItem(
-                        imageUrl: otherUser?.imageUrl ?? '', // null 안전 처리
+                        imageUrl: otherUser?.imageUrl ?? '',
                         nickname: otherUser?.nickname ?? 'Unknown',
                         content: message.content,
                         message: message,
