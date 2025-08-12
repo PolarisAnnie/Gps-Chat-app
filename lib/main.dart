@@ -16,6 +16,7 @@ import 'package:gps_chat_app/ui/pages/welcome/auth/signup_page.dart';
 import 'package:gps_chat_app/ui/pages/welcome/location_settings/location_settings.dart';
 import 'package:gps_chat_app/ui/pages/welcome/splash/splash_page.dart';
 
+//
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
