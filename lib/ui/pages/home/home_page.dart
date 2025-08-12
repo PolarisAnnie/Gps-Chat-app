@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/core/providers/viewmodels/nearby_users_provider.dart';
 import 'package:gps_chat_app/core/theme/theme.dart';
-import 'package:gps_chat_app/ui/pages/chat_room_list/chat_room_list_view_model.dart';
+import 'package:gps_chat_app/ui/pages/chat_room_list/chat_room_list_view_model.dart'
+    hide currentUserProvider;
 import 'package:gps_chat_app/ui/pages/home/widgets/cafe_suggestion.dart';
 import 'package:gps_chat_app/ui/pages/home/widgets/current_location_bar.dart';
 import 'package:gps_chat_app/ui/pages/home/widgets/member_list.dart';

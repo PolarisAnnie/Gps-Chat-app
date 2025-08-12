@@ -5,8 +5,14 @@ import 'package:gps_chat_app/data/repository/chat_room_repository.dart';
 
 final chatRoomListViewModelProvider =
     StateNotifierProvider<ChatRoomListViewModel, ChatRoomListState>((ref) {
-      return ChatRoomListViewModel(ref.read(chatRoomRepositoryProvider));
+      return ChatRoomListViewModel(
+        ref.read(
+          chatRoomRepositoryProvider as ProviderListenable<ChatRoomRepository>,
+        ),
+      );
     });
+
+mixin chatRoomRepositoryProvider {}
 
 class ChatRoomListState {
   final List<ChatRoom> chatRooms;
@@ -59,3 +65,5 @@ class ChatRoomListViewModel extends StateNotifier<ChatRoomListState> {
     print('⏹ 채팅방 스트림 중지');
   }
 }
+
+void setUserContext(String userId, String s) {}

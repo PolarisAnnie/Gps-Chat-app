@@ -5,7 +5,8 @@ import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/data/repository/chat_message_repository.dart';
 import 'package:gps_chat_app/data/repository/chat_room_repository.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
-import 'package:gps_chat_app/ui/pages/chat_room_list/chat_room_list_view_model.dart';
+
+import '../chat_room_list/chat_room_list_view_model.dart';
 
 // 채팅 페이지 상태
 class ChatPageState {
@@ -45,7 +46,7 @@ class ChatPageViewModel extends StateNotifier<ChatPageState> {
   final String roomId;
   final ChatRoomRepository _roomRepository;
   User? _currentUser;
-  StreamSubscription? _subscription; // ✅ 변경: 구독 관리
+  StreamSubscription? _subscription; // 구독 관리
 
   ChatPageViewModel({
     required this.roomId,
@@ -140,6 +141,8 @@ final chatPageViewModelProvider =
         roomId: roomId,
         currentUser: currentUser,
         messageRepository: ref.read(chatMessageRepositoryProvider),
-        roomRepository: ref.read(chatRoomRepositoryProvider),
+        roomRepository: ref.read(
+          chatRoomRepositoryProvider as ProviderListenable<ChatRoomRepository>,
+        ),
       );
     });
