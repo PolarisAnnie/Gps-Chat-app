@@ -32,6 +32,29 @@ class UserRepository {
     }
   }
 
+  // 현재 사용자를 제외한 닉네임 중복 검사
+  Future<bool> checkNicknameExistsExcludingCurrentUser(
+    String nickname,
+    String currentUserId,
+  ) async {
+    try {
+      final result = await _firestore
+          .collection('users')
+          .where('nickname', isEqualTo: nickname)
+          .get();
+
+      for (var doc in result.docs) {
+        if (doc.data()['userId'] != currentUserId) {
+          return true; // 다른 사용자가 해당 닉네임을 사용 중
+        }
+      }
+      return false; // 중복 없음
+    } catch (e) {
+      debugPrint('닉네임 중복 체크 실패: ${e.toString()}');
+      return false;
+    }
+  }
+
   Future<User?> getUserById(String userId) async {
     try {
       final docSnapshot = await _firestore
@@ -66,6 +89,22 @@ class UserRepository {
     }
   }
 
+  // 사용자 정보 업데이트
+  Future<bool> updateUser(User user) async {
+    try {
+      await _firestore.collection('users').doc(user.userId).update({
+        'nickname': user.nickname,
+        'introduction': user.introduction,
+        'imageUrl': user.imageUrl,
+        // location과 address는 별도 메서드에서 관리하므로 제외
+      });
+      return true;
+    } catch (e) {
+      debugPrint('사용자 정보 업데이트 실패: ${e.toString()}');
+      return false;
+    }
+  }
+
   Future<bool> updateUserLocation({
     required String userId,
     required GeoPoint location,
@@ -91,7 +130,7 @@ class UserRepository {
 
       return await getUserById(userId);
     } catch (e) {
-      debugPrint('현재 사용자 정보 조회 실패: $e');
+      debugPrint('현재 사용자 정보 조회 실패: ${e.toString()}');
       return null;
     }
   }
@@ -103,7 +142,7 @@ class UserRepository {
       await prefs.setString(_currentUserIdKey, userId);
       debugPrint('사용자 ID 저장 완료: $userId');
     } catch (e) {
-      debugPrint('사용자 ID 저장 실패: $e');
+      debugPrint('사용자 ID 저장 실패: ${e.toString()}');
     }
   }
 
@@ -115,7 +154,7 @@ class UserRepository {
       debugPrint('저장된 사용자 ID: $userId');
       return userId;
     } catch (e) {
-      debugPrint('사용자 ID 조회 실패: $e');
+      debugPrint('사용자 ID 조회 실패: ${e.toString()}');
       return null;
     }
   }
@@ -127,7 +166,7 @@ class UserRepository {
       await prefs.remove(_currentUserIdKey);
       debugPrint('로그아웃 완료');
     } catch (e) {
-      debugPrint('로그아웃 실패: $e');
+      debugPrint('로그아웃 실패: ${e.toString()}');
     }
   }
 }
