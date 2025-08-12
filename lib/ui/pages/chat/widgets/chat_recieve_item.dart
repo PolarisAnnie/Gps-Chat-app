@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
+import 'package:gps_chat_app/ui/pages/chat/chat_page.dart';
+import 'package:gps_chat_app/ui/pages/home/member_detail.dart';
 
-class ChatReceiveItem extends StatelessWidget {
-  const ChatReceiveItem({
-    super.key,
+class ChatReceiveItem extends ConsumerWidget {
+  ChatReceiveItem({
     required this.imageUrl,
     required this.nickname,
     required this.content,
@@ -16,17 +18,27 @@ class ChatReceiveItem extends StatelessWidget {
   final ChatMessage message;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
           height: 32,
           width: 32,
-          //decoration: BoxDecoration(shape: BoxShape.circle),
           child: GestureDetector(
-            onTap: () {
-              print('프로필 이미지 클릭');
+            onTap: () async {
+              final otherUser = await ref.read(
+                otherUserProvider(message.senderId).future,
+              );
+
+              if (otherUser != null && context.mounted) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MemberDetailPage(user: otherUser),
+                  ),
+                );
+              }
             },
             child: ClipOval(
               child: Image.network(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gps_chat_app/core/providers/viewmodels/main_navigation_viewmodel.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
 import 'package:gps_chat_app/ui/pages/chat/chat_view_model.dart';
@@ -29,17 +30,40 @@ class _ChatPageState extends ConsumerState<ChatPage> {
   @override
   void initState() {
     super.initState();
-    // 실시간 메시지 스트림 시작
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref
-          .read(chatPageViewModelProvider(widget.roomId).notifier)
-          .startMessageStream();
+    print('🔴 ChatPage initState 시작 - roomId: ${widget.roomId}');
+
+    // ✅ 변경: 채팅방 진입 시 메시지 스트림 시작
+    Future.microtask(() async {
+      try {
+        final user = await UserRepository().getCurrentUser();
+        if (user != null && mounted) {
+          print('🔴 사용자 정보 로딩 완료: ${user.nickname}');
+          final viewModel = ref.read(
+            chatPageViewModelProvider(widget.roomId).notifier,
+          );
+          viewModel.setCurrentUser(user);
+          viewModel.startMessageStream(); // ✅ 실시간 메시지 스트림 시작
+          print('🔴 startMessageStream 호출 완료');
+        }
+      } catch (e) {
+        print('🔴 사용자 정보 로딩 실패: $e');
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    // 채팅방 나갈 때 메시지 스트림 정리
+    ref
+        .read(chatPageViewModelProvider(widget.roomId).notifier)
+        .stopMessageStream();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(chatPageViewModelProvider(widget.roomId));
+    print('🔴 ChatPage build - 메시지 수: ${state.messages.length}');
     final viewModel = ref.read(
       chatPageViewModelProvider(widget.roomId).notifier,
     );
@@ -52,16 +76,27 @@ class _ChatPageState extends ConsumerState<ChatPage> {
       error: (_, __) => null,
     );
 
-    // 현재 사용자 정보 조회
-    final currentUserAsync = ref.watch(currentUserProvider);
-    final currentUser = currentUserAsync.when(
-      data: (user) => user,
-      loading: () => null,
-      error: (_, __) => null,
-    );
+    // 현재 사용자
+    final currentUser = viewModel.getCurrentUser();
 
     return Scaffold(
-      appBar: AppBar(title: Text(otherUser?.nickname ?? '채팅')),
+      appBar: AppBar(
+        title: Text(otherUser?.nickname ?? '채팅'),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(
+              context,
+            ).pushNamedAndRemoveUntil('/main', (route) => false);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              final navigationViewModel = ref.read(
+                mainNavigationViewModelProvider.notifier,
+              );
+              navigationViewModel.changeTab(1); // 채팅 탭으로 변경
+            });
+          },
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: ListView.builder(
@@ -75,13 +110,13 @@ class _ChatPageState extends ConsumerState<ChatPage> {
                 SizedBox(height: index == 0 ? 10 : 14),
                 isMyMessage
                     ? ChatSendItem(
-                        imageUrl: currentUser?.imageUrl ?? '', // null 안전 처리
+                        imageUrl: currentUser?.imageUrl ?? '',
                         nickname: currentUser?.nickname ?? 'Me',
                         content: message.content,
                         message: message,
                       )
                     : ChatReceiveItem(
-                        imageUrl: otherUser?.imageUrl ?? '', // null 안전 처리
+                        imageUrl: otherUser?.imageUrl ?? '',
                         nickname: otherUser?.nickname ?? 'Unknown',
                         content: message.content,
                         message: message,
