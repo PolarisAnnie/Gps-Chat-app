@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gps_chat_app/core/providers/states/register_state.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:gps_chat_app/core/providers/models/register_state.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
