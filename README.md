@@ -42,56 +42,53 @@
 
 ```
 lib/
-├── main.dart                      # 앱 진입점
-├── firebase_options.dart          # Firebase 설정
-├── core/                          # 핵심 기능
-│   ├── theme/                     # 앱 테마
-│   │   └── theme.dart
-│   ├── services/                  # 외부 서비스 연동
-│   │   ├── firebase_storage_service.dart
-│   │   └── naver_map_service.dart
-│   ├── utils/                     # 유틸리티
-│   │   └── location_utils.dart
-│   └── providers/                 # Riverpod 상태 관리
-│       ├── models/                # 상태 모델
-│       │   ├── auth_state.dart
-│       │   ├── location_state.dart
-│       │   └── register_state.dart
-│       └── viewmodels/            # ViewModel 로직
-│           ├── auth_viewmodel.dart
-│           ├── location_viewmodel.dart
-│           ├── register_viewmodel.dart
-│           └── splash_viewmodel.dart
+├── core/                          # 핵심 기능 및 공통 모듈
+│   ├── providers/                 # Riverpod 상태 관리
+│   ├── services/                  # 외부 서비스 연동 (Firebase Storage 등)
+│   ├── theme/                     # 앱 테마 설정
+│   └── utils/                     # 유틸리티 함수들
 ├── data/                          # 데이터 계층
-│   ├── model/                     # 데이터 모델
-│   │   └── user_model.dart
-│   └── repository/                # 데이터 저장소 (Repository 패턴)
-│       ├── storage_repository.dart
-│       ├── user_repository.dart
-│       └── naver_map_repository.dart   # 네이버 지도 API Repository
+│   ├── model/                     # 데이터 모델 (User, ChatRoom, ChatMessage 등)
+│   └── repository/                # Repository 패턴 (데이터 접근 추상화)
+│       ├── chat_message_repository.dart    # 채팅 메시지 데이터 관리
+│       ├── chat_room_repository.dart       # 채팅방 데이터 관리
+│       ├── storage_repository.dart         # 이미지 업로드/다운로드
+│       └── user_repository.dart            # 사용자 정보 관리
 └── ui/                           # UI 계층
     └── pages/                    # 화면별 페이지
-        ├── splash/               # 스플래시 화면
-        │   └── splash_page.dart
-        ├── auth/                 # 인증 관련
-        │   ├── signup_page.dart
-        │   └── register_page.dart
-        ├── location_settings/    # 위치 설정
-        │   └── location_settings.dart
-        ├── home/                 # 홈 화면 (카페 목록)
-        │   ├── home_page.dart
-        │   ├── home_empty_page.dart
-        │   └── api.dart
-        ├── chat/                 # 채팅 기능
-        │   ├── chat_page.dart
-        │   └── widgets/
+        ├── chat/                 # 채팅 화면
+        │   ├── chat_page.dart           # 1:1 채팅 화면
+        │   ├── chat_view_model.dart     # 채팅 비즈니스 로직
+        │   └── widgets/                 # 채팅 관련 위젯들
         ├── chat_room_list/       # 채팅방 목록
-        │   └── chat_room_list_page.dart
-        ├── profile/              # 프로필
-        │   └── profile_page.dart
-        └── main/                 # 메인 네비게이션
-            └── main_navigation_page.dart
+        │   ├── chat_room_list_page.dart        # 채팅방 리스트 화면
+        │   ├── chat_room_list_view_model.dart  # 채팅방 목록 비즈니스 로직
+        │   └── widgets/                        # 채팅방 아이템 위젯
+        ├── home/                 # 홈 화면
+        │   ├── home_page.dart           # 메인 홈 화면
+        │   ├── member_detail.dart       # 멤버 상세 정보 화면
+        │   └── widgets/                 # 홈 관련 위젯들
+        │       └── member_list.dart     # 주변 개발자 목록
+        └── profile/              # 프로필 관리
+            └── widgets/          # 프로필 관련 위젯들
+                └── profile_edit_form.dart  # 프로필 수정 폼
 ```
+
+---
+
+#### Core Layer (core/)
+- providers/: Riverpod 기반 상태 관리 (ViewModel 패턴)
+- services/: Firebase Storage, Naver Map API 등 외부 서비스 연동
+- theme/: 앱 전체 테마 및 디자인 시스템
+- utils/: 공통 유틸리티 함수들
+#### Data Layer (data/)
+- model/: 사용자, 채팅방, 메시지 등의 데이터 모델
+- repository/: Firebase와의 데이터 통신을 추상화한 Repository 패턴
+#### UI Layer (ui/pages/)
+- chat/: 실시간 1:1 채팅 기능
+- chat_room_list/: 참여 중인 채팅방 목록 관리
+- home/: 주변 개발자 목록 및 카페 정보 표시
+- profile/: 사용자 프로필 수정 및 관리
 
 ---
 
@@ -245,11 +242,11 @@ flutter run
 - **은희**👩‍💼 
 : 프로젝트 관리 + 채팅 기능 (Firebase 관리, ChatList & ChatPage)
 - **소린**📍 
-: 초기 화면 + 위치 기능 (Splash, 유저 설정, location 공통 기능)
+: 초기 화면 + 위치 기능 (Splash, 유저 설정, location 공통 기능) + 메인 화면 (HomePage 구현)
 - **영호**👨‍💻 
 : 프로필 관리 (Profile 정보 변경 페이지)
 - **우형**🏠 
-: 메인 화면 (HomePage 구현)
+: HomePage 구현 수정
 - **공통**🤝 
 : 문서화 및 발표 준비
 
