@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class NaverApiService {
   static const String _baseUrl =
       'https://openapi.naver.com/v1/search/local.json';
+  static const String _imageUrl = 'https://openapi.naver.com/v1/search/image';
   final String clientId;
   final String clientSecret;
 
@@ -33,7 +34,27 @@ class NaverApiService {
     }
   }
 
-  Future searchImage(replaceAll) async {}
+  Future<List<dynamic>> searchImage(String query, {int display = 1}) async {
+    final url = Uri.parse(
+      '$_imageUrl?query=${Uri.encodeQueryComponent(query)}&display=$display',
+    );
+
+    final response = await http.get(
+      url,
+      headers: {
+        'X-Naver-Client-Id': clientId,
+        'X-Naver-Client-Secret': clientSecret,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final jsonBody = json.decode(response.body);
+      return jsonBody['items'] as List<dynamic>;
+    } else {
+      print('Image API 호출 실패: ${response.body}');
+      return [];
+    }
+  }
 }
 
 void main() async {

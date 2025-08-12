@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/data/model/chat_room.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
-import 'package:gps_chat_app/data/model/user_model.dart'; // 🆕 추가
+import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/data/repository/chat_room_repository.dart';
-import 'package:gps_chat_app/data/repository/user_repository.dart'; // 🆕 추가
+import 'package:gps_chat_app/data/repository/user_repository.dart';
 
 // 채팅방 목록 상태
 class ChatRoomListState {
@@ -32,11 +32,11 @@ final currentUserProvider = FutureProvider<User?>((ref) async {
 // 채팅방 목록 비즈니스 로직
 class ChatRoomListViewModel extends StateNotifier<ChatRoomListState> {
   final ChatRoomRepository _repository;
-  final User? _currentUser; // 🆕 실제 사용자 정보
+  final User? _currentUser; // 실제 사용자 정보
 
   ChatRoomListViewModel({
     required ChatRoomRepository repository,
-    required User? currentUser, // 🆕 생성자에서 받기
+    required User? currentUser, // 생성자에서 받기
   }) : _repository = repository,
        _currentUser = currentUser,
        super(ChatRoomListState());

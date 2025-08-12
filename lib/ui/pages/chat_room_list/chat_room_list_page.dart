@@ -43,6 +43,7 @@ class ChatRoomListPage extends ConsumerWidget {
                           builder: (context) {
                             return ChatPage(
                               roomId: state.chatRooms[index].roomId,
+                              otherUserId: state.chatRooms[index].otherUserId,
                             );
                           },
                         ),

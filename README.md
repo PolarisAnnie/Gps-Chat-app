@@ -8,7 +8,7 @@
 ## 📱 프로젝트 개요
 
 - **앱 이름**: DevPot
-- **목적**: 개발자 커뮤니티 또는 개인과 연결되고 싶은 개발자들을 위한 지역 기반 매칭 앱
+- **설명**: 개발자 커뮤니티 또는 개인과 연결되고 싶은 개발자들을 위한 지역 기반 매칭 앱으로, MVVM 패턴과 Riverpod 상태 관리를 기반으로 개발되었습니다.
 - **프로젝트 기간**: 2025.08.06 ~ 2025.08.13
 - **GitHub Repository**: [https://github.com/PolarisAnnie/Gps-Chat-app](https://github.com/PolarisAnnie/Gps-Chat-app)
 
@@ -118,26 +118,33 @@ UI Layer (View) → ViewModel → Repository → Service → External API
    - `location_viewmodel.dart`: 위치 관련 모든 상태 관리
 
 #### 1. **Splash Screen** (`splash_page.dart`)
-- 앱 시작 시 애니메이션 화면
-- 3초 후 자동으로 회원가입 화면으로 이동
+- 앱 시작 시 애니메이션 화면: ui/pages/welcome/splash/splash_page.dart
+- 3초 후 자동으로 회원가입 화면으로 이동: core/providers/viewmodels/splash_viewmodel.dart
 - **ViewModel**: `SplashViewModel`
 
 #### 2. **Signup Screen** (`signup_page.dart`)
-- 닉네임 입력 및 중복 체크
+- 닉네임 입력 및 중복 체크: ui/pages/welcome/auth/signup_page.dart
 - 닉네임 유효성 검사 (4글자 이상)
 - **ViewModel**: `AuthViewModel`
 
 #### 3. **Register Screen** (`register_page.dart`)
 - 프로필 이미지 선택
-- 닉네임 및 소개글 입력
-- Firebase Storage 이미지 업로드
+- 닉네임 및 소개글 입력: ui/pages/welcome/auth/register_page.dart
+- Firebase Storage 이미지 업로드: core/providers/viewmodels/auth_viewmodel.dart, register_viewmodel.dart
 - **ViewModel**: `RegisterViewModel`
 
 #### 4. **Location Settings** (`location_settings.dart`)
-- 현재 위치 정보 가져오기
-- Naver Map API를 통한 주소 변환
-- 위치 권한 처리
+- 현재 위치 정보 가져오기(GPS):ui/pages/welcome/location_settings/location_settings.dart
+- Naver Map API를 통한 주소 변환: core/services/naver_map_service.dart
+- 위치 권한 처리: core/providers/viewmodels/location_viewmodel.dart
 - **ViewModel**: `LocationViewModel`
+
+#### 5. **메인 및 채팅 기능**
+- 주변 카페 목록이 있는 홈 화면: ui/pages/home/home_page.dart
+- 실시간 채팅 기능: ui/pages/chat/chat_page.dart
+- 채팅방 목록 관리: ui/pages/chat_room_list/chat_room_list_page.dart
+- 메인 네비게이션: ui/pages/main/main_navigation_page.dart
+
 
 ---
 
@@ -232,9 +239,14 @@ flutter run
 
 ## 👥 팀 역할 분담
 
-- **은희**👩‍💼: 프로젝트 관리 + 채팅 기능 (Firebase 관리, ChatList & ChatPage)
-- **영호**👨‍💻: 프로필 관리 (Profile 정보 변경 페이지)
-- **우형**🏠: 메인 화면 (HomePage 구현)
-- **소린**📍: 초기 화면 + 위치 기능 (Splash, 유저 설정, location 공통 기능)
-- **공통**🤝: 문서화 및 발표 준비
+- **은희**👩‍💼 
+: 프로젝트 관리 + 채팅 기능 (Firebase 관리, ChatList & ChatPage)
+- **소린**📍 
+: 초기 화면 + 위치 기능 (Splash, 유저 설정, location 공통 기능)
+- **영호**👨‍💻 
+: 프로필 관리 (Profile 정보 변경 페이지)
+- **우형**🏠 
+: 메인 화면 (HomePage 구현)
+- **공통**🤝 
+: 문서화 및 발표 준비
 

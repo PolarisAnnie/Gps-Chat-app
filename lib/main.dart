@@ -10,10 +10,10 @@ import 'package:gps_chat_app/firebase_options.dart';
 import 'package:gps_chat_app/ui/pages/chat_room_list/chat_room_list_page.dart';
 
 import 'package:gps_chat_app/ui/pages/main/main_navigation_page.dart';
-import 'package:gps_chat_app/ui/pages/auth/register_page.dart';
-import 'package:gps_chat_app/ui/pages/auth/signup_page.dart';
-import 'package:gps_chat_app/ui/pages/location_settings/location_settings.dart';
-import 'package:gps_chat_app/ui/pages/splash/splash_page.dart';
+import 'package:gps_chat_app/ui/pages/welcome/auth/register_page.dart';
+import 'package:gps_chat_app/ui/pages/welcome/auth/signup_page.dart';
+import 'package:gps_chat_app/ui/pages/welcome/location_settings/location_settings.dart';
+import 'package:gps_chat_app/ui/pages/welcome/splash/splash_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,7 +48,7 @@ class MyApp extends StatelessWidget {
           user: ModalRoute.of(context)!.settings.arguments as User,
         ),
         '/main': (context) => MainNavigationPage(), // 메인 네비게이션으로 변경
-        '/chat': (context) => ChatRoomListPage(), // 개별 채팅방용
+        // '/chat': (context) => ChatRoomListPage(), // 개별 채팅방용
       },
     );
   }

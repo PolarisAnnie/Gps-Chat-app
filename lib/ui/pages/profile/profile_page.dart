@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/core/theme/theme.dart';
 import 'package:gps_chat_app/ui/pages/profile/profile_view_model.dart';

@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gps_chat_app/data/model/chat_message.dart';
 import 'package:gps_chat_app/data/model/user_model.dart';
 import 'package:gps_chat_app/data/repository/chat_message_repository.dart';
+import 'package:gps_chat_app/data/repository/chat_room_repository.dart';
 import 'package:gps_chat_app/data/repository/user_repository.dart';
+import 'package:gps_chat_app/ui/pages/chat_room_list/chat_room_list_view_model.dart';
 
 // 채팅 페이지 상태
 class ChatPageState {
@@ -35,7 +37,7 @@ final chatMessageRepositoryProvider = Provider<ChatMessageRepository>((ref) {
 });
 
 final currentUserProvider = FutureProvider<User?>((ref) async {
-  return await UserRepository().getCurrentUser(); // 🔧 인스턴스 생성 추가
+  return await UserRepository().getCurrentUser();
 });
 
 // 채팅 페이지 비즈니스 로직
@@ -43,12 +45,15 @@ class ChatPageViewModel extends StateNotifier<ChatPageState> {
   final ChatMessageRepository _messageRepository;
   final String roomId;
   final User? _currentUser;
+  final ChatRoomRepository _roomRepository; // 소린 추가: 채팅방 관리
 
   ChatPageViewModel({
     required this.roomId,
     required User? currentUser,
     required ChatMessageRepository messageRepository,
+    required ChatRoomRepository roomRepository, // 소린 추가: 생성자에 추가
   }) : _messageRepository = messageRepository,
+       _roomRepository = roomRepository, // 소린 추가: 필드 초기화
        _currentUser = currentUser,
        super(ChatPageState());
 
@@ -88,6 +93,12 @@ class ChatPageViewModel extends StateNotifier<ChatPageState> {
       // 메시지 전송
       await _messageRepository.sendMessage(roomId: roomId, message: message);
 
+      // 채팅방 겉에 last message 업데이트
+      await _roomRepository.updateLastMessage(
+        roomId: roomId,
+        lastMessage: message,
+      );
+
       // 입력창 초기화
       state = state.copyWith(newMessageText: '', isSending: false);
     } catch (e) {
@@ -115,15 +126,12 @@ final chatPageViewModelProvider =
     ) {
       // 사용자 정보 가져오기 추가
       final currentUserAsync = ref.watch(currentUserProvider);
-      final currentUser = currentUserAsync.when(
-        data: (user) => user,
-        loading: () => null,
-        error: (_, __) => null,
-      );
+      final currentUser = currentUserAsync.asData?.value;
 
       return ChatPageViewModel(
         roomId: roomId,
         currentUser: currentUser,
         messageRepository: ref.read(chatMessageRepositoryProvider),
+        roomRepository: ref.read(chatRoomRepositoryProvider), // 소린 추가: 의존성 추가
       );
     });
