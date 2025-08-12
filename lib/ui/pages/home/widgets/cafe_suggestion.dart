@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:gps_chat_app/ui/pages/home/widgets/naver_search_api.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CafeSuggestion extends StatefulWidget {
   const CafeSuggestion({super.key});
@@ -11,11 +14,80 @@ class CafeSuggestion extends StatefulWidget {
 class _CafeSuggestionState extends State<CafeSuggestion> {
   List<dynamic> cafes = [];
   bool isLoading = true;
+  String currentAddress = '';
 
   @override
   void initState() {
     super.initState();
-    fetchCafes(); // 위젯 초기화 시 카페 데이터 로드
+    fetchCafes();
+  }
+
+  // 좌표 -> 주소 변환
+  Future<String> getAddressFromCoordinates(Position position) async {
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        // 시/도 + 구/군 까지 포함
+        return '${place.administrativeArea} ${place.subAdministrativeArea}';
+      }
+      return '';
+    } catch (e) {
+      print('주소 변환 오류: $e');
+      return '';
+    }
+  }
+
+  // 주소에서 지역명 키워드 추출 함수 (시/군/구 단위까지 넓게 커버)
+  String extractLocationKeyword(String address) {
+    if (address.isEmpty) return '';
+
+    List<String> regions = [
+      '서울',
+      '부산',
+      '대구',
+      '인천',
+      '광주',
+      '대전',
+      '울산',
+      '세종',
+      '경기',
+      '강원',
+      '충북',
+      '충남',
+      '전북',
+      '전남',
+      '경북',
+      '경남',
+      '제주',
+      '전주',
+      '수원',
+      '천안',
+      '안산',
+      '용인',
+      '완산구',
+      '덕진구',
+      '해운대구',
+      '수영구',
+    ];
+
+    List<String> parts = address.split(' ');
+
+    for (var region in regions) {
+      for (var part in parts) {
+        if (part.contains(region)) {
+          return region;
+        }
+      }
+    }
+
+    if (parts.isNotEmpty) {
+      return parts[0].replaceAll(RegExp(r'(시|군|구)$'), '');
+    }
+    return '';
   }
 
   Future<void> fetchCafes() async {
@@ -24,10 +96,26 @@ class _CafeSuggestionState extends State<CafeSuggestion> {
         isLoading = true;
       });
 
-      final api = NaverApiService();
-      final results = await api.searchLocal('카페', display: 5);
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
 
-      // For each result, fetch image URL using image search
+      currentAddress = await getAddressFromCoordinates(position);
+
+      final locationKeyword = extractLocationKeyword(currentAddress);
+
+      print('카페 검색 위치: 위도=${position.latitude}, 경도=${position.longitude}');
+      print('추출된 지역 키워드: $locationKeyword');
+
+      final api = NaverApiService();
+
+      final results = await api.searchLocal(
+        locationKeyword.isEmpty ? '카페' : '$locationKeyword 카페',
+        display: 5,
+        latitude: position.latitude,
+        longitude: position.longitude,
+      );
+
       for (var cafe in results) {
         final title = cafe['title'] ?? '';
         final images = await api.searchImage(
@@ -35,7 +123,7 @@ class _CafeSuggestionState extends State<CafeSuggestion> {
         );
 
         if (images.isNotEmpty) {
-          cafe['image'] = images.first['link']; // Use first image link
+          cafe['image'] = images.first['link'];
         } else {
           cafe['image'] = null;
         }
@@ -56,10 +144,9 @@ class _CafeSuggestionState extends State<CafeSuggestion> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 300,
+      height: 340,
       child: Column(
         children: [
-          // '코딩하기 좋은 카페 추천' 텍스트
           Container(
             width: 375,
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -92,20 +179,49 @@ class _CafeSuggestionState extends State<CafeSuggestion> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              height: 188,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                image: DecorationImage(
-                                  image:
-                                      cafe['image'] != null &&
-                                          cafe['image'].toString().isNotEmpty
-                                      ? NetworkImage(cafe['image'])
-                                      : const NetworkImage(
-                                          'https://ssl.pstatic.net/static/pwe/address/img_profile.png',
-                                        ),
-                                  fit: BoxFit.cover,
+                            GestureDetector(
+                              onTap: () {
+                                final dynamic rawPlaceId = cafe['id'];
+                                final placeId =
+                                    (rawPlaceId != null && rawPlaceId is String)
+                                    ? rawPlaceId
+                                    : '';
+                                if (placeId.isNotEmpty) {
+                                  final url =
+                                      'https://m.place.naver.com/restaurant/$placeId/home';
+                                  launchUrl(
+                                    Uri.parse(url),
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                } else {
+                                  final name = title.replaceAll(
+                                    RegExp(r'<[^>]*>'),
+                                    '',
+                                  );
+                                  final encodedName = Uri.encodeComponent(name);
+                                  final url =
+                                      'https://m.map.naver.com/search?query=$encodedName';
+                                  launchUrl(
+                                    Uri.parse(url),
+                                    mode: LaunchMode.externalApplication,
+                                  );
+                                }
+                              },
+                              child: Container(
+                                height: 188,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(12),
+                                  image: DecorationImage(
+                                    image:
+                                        cafe['image'] != null &&
+                                            cafe['image'].toString().isNotEmpty
+                                        ? NetworkImage(cafe['image'])
+                                        : const NetworkImage(
+                                            'https://ssl.pstatic.net/static/pwe/address/img_profile.png',
+                                          ),
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                             ),
@@ -118,19 +234,22 @@ class _CafeSuggestionState extends State<CafeSuggestion> {
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black87,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            Flexible(
-                              child: Text(
-                                address,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black54,
+                            const SizedBox(height: 8),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.vertical,
+                                child: Text(
+                                  address,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black54,
+                                  ),
+                                  softWrap: true,
                                 ),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
                               ),
                             ),
                           ],
